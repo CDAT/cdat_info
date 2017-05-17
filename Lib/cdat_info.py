@@ -226,7 +226,7 @@ def post_data(data):
         post = requests.post(
             url = cdat_info.post_url,
             params = data)
-        if not (200<=post.status_code()<300):
+        if not (200<=post.status_code<300):
             return data
     except BaseException,err:
         return data
