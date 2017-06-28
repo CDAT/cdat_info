@@ -10,6 +10,9 @@ import warnings
 import os
 import sys
 import requests
+import logging
+
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 Version = version.__describe__
 ping_checked = False
 cacheLock = threading.Lock()
