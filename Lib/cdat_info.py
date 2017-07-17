@@ -261,8 +261,8 @@ def clean_cache():
             cache = eval(f.read())
     except Exception,err:
         cache = []
-    cacheLock.release()
     if len(cache)==0:  # No cache
+        cacheLock.release()
         return
 
     bad=[]
@@ -272,6 +272,7 @@ def clean_cache():
             bad.append(data)
     with bz2.BZ2File(cache_file,"w") as f:
         f.write(repr(bad))
+    cacheLock.release()
 
 def submitPing(source, action, source_version=None):
     if not triedToClean:
