@@ -100,7 +100,6 @@ def get_sampledata_path():
 
 def runCheck():
     # Wait for other threads to be done
-    checkLock.acquire()
     last_time_checked = 0
     last_version_check = None
     if cdat_info.ping_checked is False:
@@ -110,13 +109,13 @@ def runCheck():
             if envanom.lower() in ['true', 'yes', 'y', 'ok','1']:
                 val = True
             elif envanom.lower() in ['false', 'no', 'n', 'not', '0']:
-                checkLock.release()
                 return False
             else:
                 warnings.warn(
                     "UVCDAT logging environment variable UVCDAT_ANONYMOUS_LOG should be set to 'True' or 'False'" +
                     ", you have it set to '%s', will be ignored" %
                     envanom)
+        checkLock.acquire()
         if val is None:  # No env variable looking in .uvcdat
             fanom = os.path.join(
                 os.path.expanduser("~"),
@@ -151,7 +150,6 @@ def runCheck():
             val = None
         checkLock.release()
         return val
-    checkLock.release()
 
 
 def askAnonymous(val):
@@ -263,8 +261,8 @@ def clean_cache():
             cache = eval(f.read())
     except Exception,err:
         cache = []
-    cacheLock.release()
     if len(cache)==0:  # No cache
+        cacheLock.release()
         return
 
     bad=[]
@@ -274,6 +272,7 @@ def clean_cache():
             bad.append(data)
     with bz2.BZ2File(cache_file,"w") as f:
         f.write(repr(bad))
+    cacheLock.release()
 
 def submitPing(source, action, source_version=None):
     if not triedToClean:
