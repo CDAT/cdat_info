@@ -22,5 +22,6 @@ cd conda-recipes
 # uvcdat creates issues for build -c uvcdat confises package and channel
 rm -rf uvcdat
 python ./prep_for_build.py
-conda build $PKG_NAME -c conda-forge -c uvcdat 
+conda build $PKG_NAME -c conda-forge 
+conda build $PKG_NAME -c conda-forge --python=36
 anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`_0.tar.bz2 --force
