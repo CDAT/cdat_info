@@ -1,16 +1,20 @@
 import pwd
 import threading
-import version
 import time
 import json
 import bz2
-import cdat_info
 import hashlib
 import warnings
 import os
 import sys
 import requests
 import logging
+from . import version
+import cdat_info
+try:
+    input=raw_input
+except:
+    pass
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 Version = version.__describe__
@@ -154,7 +158,7 @@ def runCheck():
 
 def askAnonymous(val):
     while cdat_info.ping_checked is False and val not in [True, False]:  # couldn't get a valid value from env or file
-        val2 = raw_input(
+        val2 = input(
             "Allow anonymous logging usage to help improve UV-CDAT" +
             "(you can also set the environment variable UVCDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
         if val2.lower() in ['y', 'yes', 'ok', '1', 'true', '']:
@@ -187,7 +191,7 @@ def askAnonymous(val):
 
 
 def pingPCMDIdb(*args, **kargs):
-    val = cdat_info.runCheck()
+    val = runCheck()
     if val is False:
         cdat_info.ping_checked = True
         cdat_info.ping = False
@@ -197,7 +201,7 @@ def pingPCMDIdb(*args, **kargs):
             return
     except BaseException:
         pass
-    cdat_info.askAnonymous(val)
+    askAnonymous(val)
     kargs['target'] = pingPCMDIdbThread
     kargs['args'] = args
     try:
@@ -229,7 +233,7 @@ def post_data(data):
             data = data)
         if not (200<=post.status_code<300):
             return data
-    except BaseException,err:
+    except BaseException as err:
         return data
     return None
 
@@ -259,7 +263,7 @@ def clean_cache():
     try:
         with bz2.BZ2File(cache_file)as f:
             cache = eval(f.read())
-    except Exception,err:
+    except Exception as err:
         cache = []
     if len(cache)==0:  # No cache
         cacheLock.release()
@@ -282,7 +286,7 @@ def submitPing(source, action, source_version=None):
         if source in ['cdat', 'auto', None]:
             source = cdat_info.SOURCE
         if cdat_info.ping:
-            if source not in actions_sent.keys():
+            if source not in list(actions_sent.keys()):
                 actions_sent[source] = []
             elif action in actions_sent[source]:
                 return
@@ -360,7 +364,7 @@ def download_sample_data_files(files_md5, path=None):
                 if md5.hexdigest() == good_md5:
                     attempts = 5
                     continue
-            print "Downloading: '%s' from '%s' in: %s" % (name, download_url_root, local_filename)
+            print("Downloading: '%s' from '%s' in: %s" % (name, download_url_root, local_filename))
             r = requests.get(
                 "%s/%s" % (download_url_root, name),
                 stream=True)
