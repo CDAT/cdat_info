@@ -229,10 +229,12 @@ def pingPCMDIdbThread(*args, **kargs):
 
 def post_data(data):
     try:
+        print("TRYING POST:",data)
         post = requests.post(
             url = cdat_info.post_url,
             data = data)
         if not (200<=post.status_code<300):
+            print("BAD POST:",data)
             return data
     except BaseException as err:
         return data
@@ -297,7 +299,8 @@ def submitPing(source, action, source_version=None):
             uname = os.uname()
             data['platform'] = uname[0]
             data['platform_version'] = uname[2]
-            data['hashed_hostname'] = hashlib.sha1(uname[1]).hexdigest()
+            tmp = hashlib.sha1(uname[1].encode("utf-8"))
+            data['hashed_hostname'] = tmp.hexdigest()
             data['source'] = source
             data['cdat_info_version'] = version()
             if source_version is None:
@@ -308,10 +311,10 @@ def submitPing(source, action, source_version=None):
             data['sleep'] = cdat_info.sleep
             data['pid'] = os.getpid()
             login = pwd.getpwuid(os.geteuid())[0]
-            data['hashed_username'] = hashlib.sha1(login).hexdigest()
+            data['hashed_username'] = hashlib.sha1(login.encode("utf-8")).hexdigest()
             data['gmtime'] = time.asctime(time.gmtime())
             data = post_data(data)
-    except BaseException:
+    except BaseException as err:
         pass
     if data is not None:
         cache_data(data)
