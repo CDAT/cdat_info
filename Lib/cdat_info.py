@@ -251,7 +251,7 @@ def cache_data(data):
         cache = []
     cache.append(data)
     with bz2.BZ2File(cache_file,"w") as f:
-        f.write(repr(cache))
+        f.write(repr(cache).encode('utf-8'))
     cacheLock.release()
 
 def clean_cache():
@@ -276,7 +276,7 @@ def clean_cache():
         if result is not None:
             bad.append(data)
     with bz2.BZ2File(cache_file,"w") as f:
-        f.write(repr(bad))
+        f.write(repr(bad).encode('utf-8'))
     cacheLock.release()
 
 def submitPing(source, action, source_version=None):
