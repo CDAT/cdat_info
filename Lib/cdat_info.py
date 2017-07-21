@@ -229,12 +229,10 @@ def pingPCMDIdbThread(*args, **kargs):
 
 def post_data(data):
     try:
-        print("TRYING POST:",data)
         post = requests.post(
             url = cdat_info.post_url,
             data = data)
         if not (200<=post.status_code<300):
-            print("BAD POST:",data)
             return data
     except BaseException as err:
         return data
