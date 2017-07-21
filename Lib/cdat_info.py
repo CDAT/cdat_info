@@ -360,7 +360,7 @@ def download_sample_data_files(files_md5, path=None):
         while attempts < 3:
             md5 = hashlib.md5()
             if os.path.exists(local_filename):
-                f = open(local_filename)
+                f = open(local_filename,"rb")
                 md5.update(f.read())
                 if md5.hexdigest() == good_md5:
                     attempts = 5
