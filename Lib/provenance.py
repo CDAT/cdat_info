@@ -15,7 +15,7 @@ def populate_prov(prov, cmd, pairs, sep=None, index=1, fill_missing=False):
     if stde != '':
         return
     for strBit in out.splitlines():
-        for key, value in pairs.iteritems():
+        for key, value in pairs.items():
             if value in strBit:
                 prov[key] = strBit.split(sep)[index].strip()
     if fill_missing is not False:
