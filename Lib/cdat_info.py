@@ -96,7 +96,7 @@ def get_prefix():
 
 def get_sampledata_path():
     try:
-        return os.path.join(os.environ["UVCDAT_SETUP_PATH"],
+        return os.path.join(os.environ.get("UVCDAT_SETUP_PATH", sys.prefix),
                             "share", "uvcdat", "sample_data")
     except KeyError:
         raise RuntimeError(
@@ -382,7 +382,6 @@ def download_sample_data_files(files_md5, path=None):
                 attempts += 1
 
 
-os.environ["UVCDAT_SETUP_PATH"] = sys.prefix
 CDMS_INCLUDE_DAP = 'yes'
 CDMS_DAP_DIR = '.'
 CDMS_HDF_DIR = '.'
