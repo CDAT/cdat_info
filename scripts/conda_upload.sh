@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 PKG_NAME=cdat_info
-USER=uvcdat
+USER=cdat
 VERSION="2.12"
 echo "Trying to upload conda"
 if [ `uname` == "Linux" ]; then
