@@ -2,7 +2,7 @@ from __future__ import print_function
 from distutils.core import setup
 import subprocess
 
-Version = "2.12"
+Version = "8.0"
 p = subprocess.Popen(
     ("git",
      "describe",
