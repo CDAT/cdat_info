@@ -7,7 +7,6 @@ aliases:
       mkdir -p workspace
       git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
-      
 
   - &conda_upload
     name: conda_upload
@@ -40,7 +39,6 @@ jobs:
     steps:
       - run: *setup_miniconda
       - run: *conda_upload
-
 
   linux_cdat_info:
     machine:
