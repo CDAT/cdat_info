@@ -18,9 +18,7 @@ jobs:
       WORKDIR: "workspace/test_macos_cdat_info"
       OS: "osx-64"
     steps:
-      - checkout
       - run: *setup_miniconda
-
 
 workflows:
   version: 2
