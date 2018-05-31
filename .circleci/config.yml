@@ -1,9 +1,5 @@
 version: 2
 
-checkout:
-  post:
-    - ./ci-support/checkout_merge_commit.sh
-
 aliases:
   - &setup_miniconda
     name: setup_miniconda
