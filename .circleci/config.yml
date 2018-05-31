@@ -10,11 +10,6 @@ aliases:
     command: |
       echo "xxx xxx setup_miniconda"
 
-  - &conda_upload
-    name: conda_upload
-    command: |
-       echo "xxx xxx conda_upload"
-
 jobs:
   macos_cdat_info:
     macos:
@@ -25,7 +20,6 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-      - run: *conda_upload
 
   linux_cdat_info:
     machine:
@@ -36,7 +30,6 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-      - run: *conda_upload
 
 workflows:
   version: 2
