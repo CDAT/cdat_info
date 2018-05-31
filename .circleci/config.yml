@@ -4,13 +4,15 @@ aliases:
   - &setup_miniconda
     name: setup_miniconda
     command: |
-      mkdir -p workspace
-      git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
-      python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
+      echo "xxx xxx setup_miniconda"
+      #mkdir -p workspace
+      #git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
+      #python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
 
   - &conda_upload
     name: conda_upload
     command: |
+       echo "xxx xxx conda_upload"
        if [[ $CIRCLE_BRANCH != 'revisit_run_tests' ]]; then
           exit 0
        fi
