@@ -1,0 +1,66 @@
+version: 2
+
+checkout:
+  post:
+    - ./ci-support/checkout_merge_commit.sh
+        
+aliases:
+  - &setup_miniconda
+    name: setup_miniconda
+    command: |
+      mkdir -p workspace
+      git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
+      python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
+      
+
+  - &conda_upload
+    name: conda_upload
+    command: |
+       if [[ $CIRCLE_BRANCH != 'revisit_run_tests' ]]; then
+          exit 0
+       fi
+       export PATH=${HOME}/project/$WORKDIR/miniconda/bin:$PATH
+       conda install conda-build anaconda-client
+       conda config --set anaconda_upload no
+       export CONDA_BLD_PATH=`pwd`/conda_build
+       git clone git://github.com/cdat/conda-recipes
+       cd conda-recipes
+       export PKG_NAME=cdat_info
+       export USER=cdat
+       export VERSION=8.0
+       export LABEL=nightly
+       python ./prep_for_build.py -l $VERSION
+       conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat 
+       conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=3.6
+       anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
+
+jobs:
+  macos_cdat_info:
+    macos:
+      xcode: "9.2.0"
+    environment:
+      WORKDIR: "workspace/test_macos_cdat_info"
+      OS: "osx-64"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *conda_upload
+
+
+  linux_cdat_info:
+    machine:
+      image: circleci/classic:latest
+    environment:
+      WORKDIR: "workspace/test_linux_cdat_info"
+      OS: "linux-64"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *conda_upload
+
+workflows:
+  version: 2
+  cdat_info:
+    jobs:
+      - macos_cdat_info
+      - linux_cdat_info
