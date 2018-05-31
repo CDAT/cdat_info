@@ -21,19 +21,9 @@ jobs:
       - checkout
       - run: *setup_miniconda
 
-  linux_cdat_info:
-    machine:
-      image: circleci/classic:latest
-    environment:
-      WORKDIR: "workspace/test_linux_cdat_info"
-      OS: "linux-64"
-    steps:
-      - checkout
-      - run: *setup_miniconda
 
 workflows:
   version: 2
   cdat_info:
     jobs:
       - macos_cdat_info
-      - linux_cdat_info
