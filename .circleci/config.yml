@@ -1,9 +1,5 @@
 version: 2
 
-checkout:
-  post:
-    - ./ci-support/checkout_merge_commit.sh
-        
 aliases:
   - &setup_miniconda
     name: setup_miniconda
@@ -42,7 +38,6 @@ jobs:
       WORKDIR: "workspace/test_macos_cdat_info"
       OS: "osx-64"
     steps:
-      - checkout
       - run: *setup_miniconda
       - run: *conda_upload
 
@@ -54,7 +49,6 @@ jobs:
       WORKDIR: "workspace/test_linux_cdat_info"
       OS: "linux-64"
     steps:
-      - checkout
       - run: *setup_miniconda
       - run: *conda_upload
 
