@@ -27,6 +27,7 @@ aliases:
        python ./prep_for_build.py -l $VERSION
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat 
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=3.6
+       echo "xxx xxx CONDA_UPLOAD_TOKEN: "$CONDA_UPLOAD_TOKEN
        anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
 
 jobs:
