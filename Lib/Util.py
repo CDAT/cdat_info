@@ -5,13 +5,9 @@ import shlex
 import Const
 import hashlib
 import time
-import multiprocessing
-import requests
-
 from Const import *
 
 def run_command(command, join_stderr=True, verbosity=2):
-
     if isinstance(command, str):
         command = shlex.split(command)
     if verbosity > 0:
@@ -20,6 +16,7 @@ def run_command(command, join_stderr=True, verbosity=2):
         stderr = subprocess.STDOUT
     else:
         stderr = subprocess.PIPE
+    print("CMD: {c}".format(c=command))
 
     P = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=stderr,
                          bufsize=0, cwd=os.getcwd())
@@ -63,6 +60,7 @@ def download_sample_data_files(files_md5, path=None):
     vcs.sample_data directory.
     :type path: `str`_ or `None`_
     """
+    print("xxx xxx download_sample_data_files, files_md5: {f} ".format(f=files_md5))
     if not os.path.exists(files_md5) or os.path.isdir(files_md5):
         raise RuntimeError(
             "Invalid file type for list of files: %s" %
@@ -71,15 +69,16 @@ def download_sample_data_files(files_md5, path=None):
         path = get_sampledata_path()
 
     samples = open(files_md5).readlines()
+    print("xxx xxx samples[0] : {s}".format(s=samples[0]))
+    dowload_url_root = samples[0].strip()
 
-    if len(samples[0].strip().split()) > 1:
-        # Old style 
-        download_url_root = "https://cdat.llnl.gov/cdat/sample_data/"
-        n0 = 0
-    else:
-        download_url_root = samples[0].strip()  
-        n0 = 1
-
+    #if len(download_url_root.split()) > 1:
+    #    # Old style DO WE STILL NEED THIS??
+    #    download_url_root = "https://cdat.llnl.gov/cdat/sample_data/"
+    #    n0 = 0
+    #else:
+    #    n0 = 1
+    n0 = 1
     for sample in samples[n0:]:
         good_md5, name = sample.split()
         local_filename = os.path.join(path, name)
@@ -109,8 +108,9 @@ def download_sample_data_files(files_md5, path=None):
             else:
                 attempts += 1
 
-def run_nose(arguments):
 
+#def run_nose(run_options, verbosity, test_name):
+def run_nose(arguments):
     run_options, attrs, verbosity, test_name = arguments
     opts = []
     if run_options & OPT_COVERAGE:
@@ -125,48 +125,3 @@ def run_nose(arguments):
     end = time.time()
     return {test_name: {"result": ret_code, "log": out, "times": {
                 "start": start, "end": end}}}
-
-def add_arguments(parser, options):
-    """
-    This function does add_argument() method on parser where 
-    parser isargparse.ArgumentParser().
-    This function is called from test suite's run_tests.py
-    """
-    if options & OPT_GENERATE_HTML:
-        parser.add_argument("-H", "--html", action="store_true", 
-                            help="create and show html result page")
-    if options & OPT_PACKAGE_RESULT:
-        parser.add_argument("-p", "--package", action="store_true",
-                            help="package test results")
-
-    if options & OPT_GET_BASELINE:
-        parser.add_argument("-g", "--git", action="store_true", default=False,
-                            help="run git checkout calls")
-
-    if options & OPT_FAILED_ONLY:
-        parser.add_argument("-f", "--failed_only", action="store_true",
-                            default=False,
-                            help="runs only tests that failed last time and are in the list you provide")
-
-    if options & OPT_NO_VTK_UI:
-        parser.add_argument("--no_vtk_ui", action="store_true", default=False,
-                            help="do not vtk_ui tests")
-
-    if options & OPT_VERBOSITY:
-        parser.add_argument("-v", "--verbosity", default=1, choices=[0, 1, 2],
-                            type=int, help="verbosity output level")
-
-    if options & OPT_VTK:
-        parser.add_argument("-V", "--vtk", default=None,
-                            help="conda channel and extras to use for vtk. Command will be 'conda install -c [VTK] vtk-cdat'")
-    if options & OPT_NCPUS:
-        ncpus = multiprocessing.cpu_count()
-        parser.add_argument("-n", "--cpus", default=ncpus, type=int, 
-                            help="number of cpus to use")
-
-    if options & OPT_NOSETEST_ATTRS:
-        parser.add_argument("-A","--attributes", default=[], action="append",
-                            help="attribute-based runs")
-
-    # TEST this default = None
-    parser.add_argument("tests", nargs="*", default=None, help="tests to run")
