@@ -8,6 +8,18 @@ aliases:
       git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
 
+  - &setup_cdat_info
+    name: setup_cdat_info
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export UVCDAT_ANONYMOUS_LOG=False
+       source activate py3
+       python setup.py install
+       source activate py2
+       rm -rf build
+       python setup.py install
+
+
   - &conda_upload
     name: conda_upload
     command: |
