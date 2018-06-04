@@ -53,6 +53,7 @@ jobs:
       OS: "osx-64"
     steps:
       - run: *setup_miniconda
+      - run: *setup_cdat_info
       - run: *conda_upload
 
   linux_cdat_info:
@@ -63,6 +64,7 @@ jobs:
       OS: "linux-64"
     steps:
       - run: *setup_miniconda
+      - run: *setup_cdat_info
       - run: *conda_upload
 
 workflows:
