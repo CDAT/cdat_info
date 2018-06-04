@@ -1,4 +1,5 @@
 from __future__ import print_function
+from functools import partial
 
 import glob
 import sys
@@ -16,32 +17,55 @@ from Const import *
 
 class TestRunnerBase:
 
-    def __init__(self, test_suite_name, args, get_sample_data=False):
+    """
+    This is a base class for a test runner.
+    Each test project's run_tests.py should instantiate this TestRunnerBase class,
+    and call the run() method. For example:
+
+      runner = TestRunnerBase.TestRunnerBase(test_suite_name, valid_options, 
+         args, get_sample_data)
+      runner.run(workdir, args.tests)
+    """
+    def __init__(self, test_suite_name, options, args, get_sample_data=False):
+        """
+           test_suite_name: test suite name
+           options        : valid options (32 bit integer) for the testsuite.
+                            See Const.py for valid bits that can be set.
+           args           : arguments to run_tests.py -- this is the 
+                            return value of argparse,parse_args()
+           get_sample_data: specifies whether sample data should be downloaded
+                            for the test run.
+        """
         self.test_suite_name = test_suite_name
         self.run_options = 0x00000000
-        if args.html:
+
+        if options & OPT_GENERATE_HTML and args.html:
             self.run_options |= OPT_GENERATE_HTML
-        if args.package:
+        if options & OPT_PACKAGE_RESULT and args.package:
             self.run_options |= OPT_PACKAGE_RESULT
-        if args.git:
+        if options & OPT_GET_BASELINE and args.git:
             self.run_options |= OPT_GET_BASELINE
-        if args.failed_only:
+        if options & OPT_FAILED_ONLY and args.failed_only:
             self.run_options |= OPT_FAILED_ONLY
-        if args.no_vtk_ui:
+        if options & OPT_NO_VTK_UI and args.no_vtk_ui:
             self.run_options |= OPT_NO_VTK_UI
-        if args.verbosity:
+        if options & OPT_VERBOSITY and args.verbosity:
             self.verbosity = args.verbosity
         else:
             self.verbosity = 1
-        if args.vtk:
+
+        if options & OPT_VTK and args.vtk:
             self.vtk_channels = args.vtk
-        if args.cpus:
+        else:
+            self.vtk_channels = None
+
+        if options & OPT_NCPUS and args.cpus:
             self.ncpus = args.cpus
         else:
             self.ncpus = 1
 
-        if args.attributes:
-            self.nosetests_attr = args.attributes
+        if options & OPT_NOSETEST_ATTRS and args.attributes:
+            self.nosetest_attrs = args.attributes
         else:
             self.nosetests_attr = []
 
@@ -50,6 +74,39 @@ class TestRunnerBase:
                                                     self.test_suite_name, "test_data_files.txt"),
                                        get_sampledata_path())
             
+    def __set_run_options(self, options, args):
+        if options & OPT_GENERATE_HTML and args.html:
+            self.run_options |= OPT_GENERATE_HTML
+
+        if options & OPT_PACKAGE_RESULT and args.package:
+            self.run_options |= OPT_PACKAGE_RESULT
+
+        if options & OPT_GET_BASELINE and args.git:
+            self.run_options |= OPT_GET_BASELINE
+
+        if options & OPT_FAILED_ONLY and args.failed_only:
+            self.run_options |= OPT_FAILED_ONLY
+
+        if options & OPT_COVERAGE and args.coverage:
+            self.run_options |= OPT_COVERAGE
+
+        if options & OPT_NO_VTK_UI and args.no_vtk_ui:
+            self.run_options |= OPT_NO_VTK_UI
+
+        if options & OPT_VERBOSITY and args.verbosity:
+            self.verbosity = args.verbosity
+        else:
+            self.verbosity = 1
+
+        if options & OPT_VTK and args.vtk:
+            self.vtk_channels = args.vtk
+        else:
+            self.vtk_channels = None
+
+        self.ncpus = args.cpus
+        self.nosetests_attr = args.attributes
+        
+
     def __is_option_set(self, option):
         return self.run_options & option
     
@@ -64,15 +121,11 @@ class TestRunnerBase:
         If <failed_only> is True, and <tests> is specified, returns 
         the set of failed test names that is listed in <tests>
         """
-        print("xxx xxx in __get_tests...")
-        if tests is None:
+        if tests is None or len(tests) == 0:
             # run all tests
-            print("xxx xxx glob")
             test_names = glob.glob("tests/test_*py")
-            print("xxx xxx test_names...1...: {t}".format(t=test_names))
         else:
             test_names = set(tests)
-            print("xxx xxx test_names...2...: {t}".format(t=test_names))
 
         if failed_only and os.path.exists(os.path.join("tests",".last_failure")):
             f = open(os.path.join("tests", ".last_failure"))
@@ -96,7 +149,6 @@ class TestRunnerBase:
         ret_code, cmd_output = self.__run_cmd('git rev-parse --abbrev-ref HEAD')
         o = "".join(cmd_output)
         branch = o.strip()
-        print("xxx xxx DEBUG DEBUG...{b}".format(b=branch))
         if not os.path.exists("uvcdat-testdata"):
             cmd = "git clone git://github.com/cdat/uvcdat-testdata"
             ret_code, cmd_output = self.__run_cmd(cmd)
@@ -124,49 +176,13 @@ class TestRunnerBase:
         ret_code, cmd_output = run_command(cmd, True, self.verbosity)
         return ret_code, cmd_output
 
-    def run_noseOBSOLETE(self, arguments):
-        run_options, verbosity, test_name = arguments
-        opts = []
-        if run_options & OPT_COVERAGE:
-            opts += ["--with-coverage"]
-        if run_options & OPT_NO_VTK_UI:
-            opts += ["-A", 'not vtk_ui']
-        for att in self.nosetests_attr:
-            opts += ["-A", att]
-            command = ["nosetests", ] + opts + ["-s", test_name]
-            start = time.time()
-            ret_code, out = run_command(command, True, verbosity)
-            end = time.time()
-            return {test_name: {"result": ret_code, "log": out, "times": {
-                "start": start, "end": end}}}
-
-    def run_nose_NEW(self, arguments):
-        run_options, attrs, verbosity, test_name = arguments
-        opts = []
-        if run_options & OPT_COVERAGE:
-            opts += ["--with-coverage"]
-        if run_options & OPT_NO_VTK_UI:
-            opts += ["-A", 'not vtk_ui']
-        for att in attrs:
-            opts += ["-A", att]
-        command = ["nosetests", ] + opts + ["-s", test_name]
-        start = time.time()
-        ret_code, out = run_command(command, True, verbosity)
-        end = time.time()
-        return {test_name: {"result": ret_code, "log": out, "times": {
-                    "start": start, "end": end}}}
-
-
-
     def __do_run_tests(self, test_names):
-        print("xxx xxx xxx DEBUG DEBUG...{t}".format(t=test_names))
         ret_code = SUCCESS
         p = multiprocessing.Pool(self.ncpus)
         try:
-            arguments = ((self.run_options, self.nosetests_attr,
-                          self.verbosity, test_case) for test_case in test_names)
-            outs = p.map_async(self.run_nose_NEW, arguments).get(3600)
-            #outs = p.map_async(run_nose, self.run_options, test_names).get(3600)
+            func = partial(run_nose, self.run_options, self.nosetests_attr, 
+                           self.verbosity)
+            outs = p.map_async(func, test_names).get(3600)
         except KeyboardInterrupt:
             sys.exit(1)
         results = {}
@@ -263,7 +279,6 @@ class TestRunnerBase:
         print("<tfoot><tr><th>Test</th><th>Result</th><th>Start Time</th><th>End Time</th><th>Time</th></tr></tfoot>", file=fi)
 
         for t in sorted(self.results.keys()):
-            print("xxx xxx t: {t}".format(t=t))
             result = self.results[t]
             nm = t.split("/")[-1][:-3]
             print("<tr><td>%s</td>" % nm, end=' ', file=fi)
@@ -300,6 +315,8 @@ class TestRunnerBase:
         print("</table></body></html>", file=fi)
         fi.close()
         os.chdir(workdir)
+        print("xxx opening web browser")
+        webbrowser.open("file://%s/tests_html/index.html" % workdir)
         ## REMEMBER needs to do webbrowser.open()
 
     def __package_results(self, workdir):
@@ -315,8 +332,13 @@ class TestRunnerBase:
             
 
     def run(self, workdir, tests=None):
-        os.chdir(workdir)
+        """
+        runs the specified test cases. If tests is None, runs the whole testsuite.
 
+        workdir: top level project repo directory
+        tests  : a space separated list of test cases
+        """
+        os.chdir(workdir)
         test_names = self.__get_tests(self.__is_option_set(OPT_FAILED_ONLY), tests)
 
         if self.__is_option_set(OPT_GET_BASELINE):
@@ -328,9 +350,6 @@ class TestRunnerBase:
 
         if self.__is_option_set(OPT_GENERATE_HTML) or self.__is_option_set(OPT_PACKAGE_RESULT):
             self.__generate_html(workdir)
-
-        if self.__is_option_set(OPT_GENERATE_HTML):            
-            webbrowser.open("file://%s/tests_html/index.html" % workdir)
 
         if self.__is_option_set(OPT_PACKAGE_RESULT):
             self.__package_results(workdir)
