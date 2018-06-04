@@ -1,5 +1,9 @@
 version: 2
 
+checkout:
+  post:
+    - ./ci-support/checkout_merge_commit.sh
+
 aliases:
   - &setup_miniconda
     name: setup_miniconda
@@ -11,8 +15,6 @@ aliases:
   - &setup_cdat_info
     name: setup_cdat_info
     command: |
-       pwd
-       ls -l
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
        source activate base
@@ -50,6 +52,7 @@ jobs:
       WORKDIR: "workspace/test_macos_cdat_info"
       OS: "osx-64"
     steps:
+      - checkout
       - run: *setup_miniconda
       - run: *setup_cdat_info
       - run: *conda_upload
@@ -61,6 +64,7 @@ jobs:
       WORKDIR: "workspace/test_linux_cdat_info"
       OS: "linux-64"
     steps:
+      - checkout
       - run: *setup_miniconda
       - run: *setup_cdat_info
       - run: *conda_upload
