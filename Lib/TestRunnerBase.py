@@ -73,8 +73,7 @@ class TestRunnerBase:
             self.nosetests_attr = []
 
         if get_sample_data == True:
-            download_sample_data_files(os.path.join(test_data_files_info,
-                                                    get_sampledata_path())
+            download_sample_data_files(test_data_files_info, get_sampledata_path())
             
     def __set_run_options(self, options, args):
         if options & OPT_GENERATE_HTML and args.html:
