@@ -26,7 +26,8 @@ class TestRunnerBase:
          args, get_sample_data)
       runner.run(workdir, args.tests)
     """
-    def __init__(self, test_suite_name, options, args, get_sample_data=False):
+    def __init__(self, test_suite_name, options, args, get_sample_data=False, 
+                 test_data_files_info=None):
         """
            test_suite_name: test suite name
            options        : valid options (32 bit integer) for the testsuite.
@@ -35,6 +36,8 @@ class TestRunnerBase:
                             return value of argparse,parse_args()
            get_sample_data: specifies whether sample data should be downloaded
                             for the test run.
+           test_data_files_info: file name of a text file containing list of 
+                            data files needed for the test suite.
         """
         self.test_suite_name = test_suite_name
         self.run_options = 0x00000000
@@ -70,9 +73,8 @@ class TestRunnerBase:
             self.nosetests_attr = []
 
         if get_sample_data == True:
-            download_sample_data_files(os.path.join(sys.prefix, "share", 
-                                                    self.test_suite_name, "test_data_files.txt"),
-                                       get_sampledata_path())
+            download_sample_data_files(os.path.join(test_data_files_info,
+                                                    get_sampledata_path())
             
     def __set_run_options(self, options, args):
         if options & OPT_GENERATE_HTML and args.html:
@@ -315,9 +317,8 @@ class TestRunnerBase:
         print("</table></body></html>", file=fi)
         fi.close()
         os.chdir(workdir)
-        print("xxx opening web browser")
         webbrowser.open("file://%s/tests_html/index.html" % workdir)
-        ## REMEMBER needs to do webbrowser.open()
+
 
     def __package_results(self, workdir):
         os.chdir(workdir)
