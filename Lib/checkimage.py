@@ -59,6 +59,11 @@ def find_alternates(fname):
     return results
 
 
+def printDart(name, type, value, suff=""):
+        print('<DartMeasurement%s name="%s" type="%s">%s</DartMeasurement%s>' % (
+            suff, name, type, value, suff))
+
+
 def check_result_image(fname, baselinefname, threshold=defaultThreshold,
                        baseline=True, cleanup=True, update_baseline=False):
                     
@@ -131,10 +136,7 @@ def check_result_image(fname, baselinefname, threshold=defaultThreshold,
     print("Saving image diff at %s" % diffFilename)
     dump_image_to_file(diffFilename, bestDiffImage)
 
-# Print metadata for CDash image upload:
-def printDart(name, type, value, suff=""):
-        print('<DartMeasurement%s name="%s" type="%s">%s</DartMeasurement%s>' % (
-            suff, name, type, value, suff))
+    # Print metadata for CDash image upload:
     printDart("ImageError", "numeric/double", "%f" % bestDiff)
     printDart("TestImage", "image/png", os.path.abspath(fname), "File")
     printDart(

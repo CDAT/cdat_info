@@ -8,6 +8,8 @@ import time
 import multiprocessing
 import requests
 
+SUCCESS = 1
+
 def run_command(command, join_stderr=True, verbosity=2):
 
     if isinstance(command, str):
@@ -58,6 +60,7 @@ def download_sample_data_files(files_md5, path=None):
     vcs.sample_data directory.
     :type path: `str`_ or `None`_
     """
+    print("MD5:",files_md5)
     if not os.path.exists(files_md5) or os.path.isdir(files_md5):
         raise RuntimeError(
             "Invalid file type for list of files: %s" %
@@ -103,3 +106,11 @@ def download_sample_data_files(files_md5, path=None):
                 attempts = 5
             else:
                 attempts += 1
+
+def run_nose(opts, verbosity, test_name):
+    command = ["nosetests", ] + opts + ["-s", test_name]
+    start = time.time()
+    ret_code, out = run_command(command, True, verbosity)
+    end = time.time()
+    return {test_name: {"result": ret_code, "log": out, "times": {
+                "start": start, "end": end}}}

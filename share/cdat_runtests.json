@@ -8,9 +8,10 @@
     "default": "git://github.com/cdat/uvcdat-testdata",
      "help": "Git checkout a repo containing the baselines"
     },
+    "--checkout_baseline": {"action":"store_true","default":false,"help":"checkout the baselines via git", "type":null},
     "--coverage": {"aliases":["-c"],
     "action":"store_true",
-    "help":"run nose test with coverage info",
+    "help":"run nose test with coverage info","type":null,
     "default":false},
     "--diags":{
         "aliases":[
@@ -24,11 +25,12 @@
     },
     "--failed":{"aliases":["-f"],
     "help":"Run only test that failed last time",
-    "action":"store_true", "default": false},
+    "action":"store_true", "default": false, "type":null},
     "--html":{
         "aliases": ["-H"],
         "action": "store_true",
-        "help": "create and show html result page"
+        "help": "create and show html result page",
+        "type":null
     },
     "--num_workers":{
         "aliases":[
@@ -41,7 +43,7 @@
     "--package":{
     "aliases": ["-P"],
     "action": "store_true",
-    "help": "package test results"
+    "help": "package test results", "type":null
     },
     "--parameters":{
         "aliases":[
@@ -56,12 +58,9 @@
         "required":false,
         "type":"str"
     },
-    "tests":{
-        "nargs": "*",
-        "help": "tests to run"
-    },
     "--verbosity": {"aliases":["-v"],
     "choices":[0,1,2],
 "default":1,
+"type":"int",
 "help":"verbosity output level"}
 }

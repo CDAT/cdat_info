@@ -1,18 +1,26 @@
 from __future__ import print_function
 from functools import partial
-
 import glob
 import sys
 import os
 import multiprocessing
 import subprocess
-import image_compare
 import codecs
 import time
 import webbrowser
 import shlex
+import cdp
+import warnings
+from .Util import run_command, download_sample_data_files, get_sampledata_path, run_nose
 
-from .Util import run_command
+SUCCESS = 0
+FAILURE = 1
+
+try:
+    import image_compare
+    hasImageDifference = True
+except:
+    hasImageDifference = False
 
 class TestRunnerBase:
 
@@ -25,48 +33,43 @@ class TestRunnerBase:
          args, get_sample_data)
       runner.run(workdir, args.tests)
     """
-    def __init__(self, test_suite_name, options=[], option_files=[], get_sample_data=False, 
+    def __init__(self, test_suite_name, options=[], options_files=[], get_sample_data=False, 
                  test_data_files_info=None):
         """
            test_suite_name: test suite name
-           options        : valid options (32 bit integer) for the testsuite.
-                            See Const.py for valid bits that can be set.
-           args           : arguments to run_tests.py -- this is the 
-                            return value of argparse,parse_args()
+           options        : options to use (in addition of default options always here)
+           options_files  : json files defining cdp/addparse argument definitions
            get_sample_data: specifies whether sample data should be downloaded
                             for the test run.
            test_data_files_info: file name of a text file containing list of 
                             data files needed for the test suite.
         """
         options_files.insert(0,os.path.join(sys.prefix,"share","cdat","cdat_runtests.json"))
-        parser = cdp.cdp_parser.CDPPraser(None, set(option_files))
-        parser.addArgument("tests",nargs="*",help="Tests to run")
+        # Remove possible duplicates
+        options_files = set(options_files)
+        parser = cdp.cdp_parser.CDPParser(None, list(options_files))
+        parser.add_argument("tests",nargs="*",help="Tests to run")
 
         options += ["--coverage","--verbosity","--num_workers","--attributes",
-                    "--failed","--package","tests"]
+                    "--parameters","--diags","--baseline","--checkout_baseline",
+                    "--html", "--failed","--package"]
         for option in set(options):
-            parser.use(opt)
+            parser.use(option)
         
-        self.args = parser.getParameter()
+        self.args = parser.get_parameter()
         self.test_suite_name = test_suite_name
-        self.run_options = 0x00000000
 
-        self.verbosity = args.verbosity
+        self.verbosity = self.args.verbosity
 
-        self.ncpus = args.num_workers
-
-        self.nosetest_attrs = args.attributes
+        self.ncpus = self.args.num_workers
 
         if get_sample_data == True:
+            if test_data_files_info is None:
+                test_data_files_info = os.path.join("share","test_data_files.txt")
             download_sample_data_files(test_data_files_info, get_sampledata_path())
             
-    def __is_option_set(self, option):
-        opt = getattr(self.args, option, False)
-        if not isinstance(opt, bool):
-            opt = True
-        return True
     
-    def __get_tests(self, failed_only=False, tests=None):
+    def __get_tests(self, tests=None):
         """
         get_tests() gets the list of test names to run.
         If <failed_only> is False, returns the set of the specified
@@ -83,7 +86,7 @@ class TestRunnerBase:
         else:
             test_names = set(tests)
 
-        if failed_only and os.path.exists(os.path.join("tests",".last_failure")):
+        if self.args.failed and os.path.exists(os.path.join("tests",".last_failure")):
             f = open(os.path.join("tests", ".last_failure"))
             failed = set(eval(f.read().strip()))
             f.close()
@@ -125,28 +128,23 @@ class TestRunnerBase:
         ret_code, cmd_output = run_command(cmd, True, self.verbosity)
         return ret_code, cmd_output
 
-    def prep_options(self):
+    def __prep_nose_options(self):
         """Place holder extend this if you want more options"""
         return []
 
-    def run_nose(self, test_name:
-        opts = self.prep_options()
-        if self.args.coverage:
-            opts += ["--with-coverage"]
-        for att in self.args.attributes:
-            opts += ["-A", att]
-        command = ["nosetests", ] + opts + ["-s", test_name]
-        start = time.time()
-        ret_code, out = run_command(command, True, verbosity)
-        end = time.time()
-        return {test_name: {"result": ret_code, "log": out, "times": {
-                    "start": start, "end": end}}}
 
     def __do_run_tests(self, test_names):
         ret_code = SUCCESS
         p = multiprocessing.Pool(self.ncpus)
+        # Let's prep the options once and for all
+        opts = self.__prep_nose_options()
+        if self.args.coverage:
+            opts += ["--with-coverage"]
+        for att in self.args.attributes:
+            opts += ["-A", att]
+        func = partial(run_nose,opts, self.verbosity)
         try:
-            outs = p.map_async(self.run_nose, (test_names, opts).get(3600)
+            outs = p.map_async(func, test_names).get(3600)
         except KeyboardInterrupt:
             sys.exit(1)
         results = {}
@@ -213,13 +211,18 @@ class TestRunnerBase:
                     # break
         return file1, file2, diff
 
-    def __generate_html(self, workdir):
+    def __generate_html(self, workdir, image_difference=True):
         os.chdir(workdir)
         if not os.path.exists("tests_html"):
             os.makedirs("tests_html")
         os.chdir("tests_html")
 
-        js = image_compare.script_data()
+        if image_difference:
+            if not hasImageDifference:
+                warnings.warn("Could not load image_compare module, html will not be able to render image diff")
+                js = ""
+            else:
+                js = image_compare.script_data()
 
         fi = open("index.html", "w")
         print("<!DOCTYPE html>", file=fi)
@@ -302,19 +305,19 @@ class TestRunnerBase:
         tests  : a space separated list of test cases
         """
         os.chdir(workdir)
-        test_names = self.__get_tests(self.__is_option_set(OPT_FAILED_ONLY), tests)
+        test_names = self.__get_tests(tests)
 
-        if self.__is_option_set(OPT_GET_BASELINE):
+        if self.args.checkout_baseline:
             ret_code = self.__get_baseline(workdir)
             if ret_code != SUCCESS:
                 return(ret_code)
 
         ret_code = self.__do_run_tests(test_names)
 
-        if self.__is_option_set(OPT_GENERATE_HTML) or self.__is_option_set(OPT_PACKAGE_RESULT):
+        if self.args.html or self.args.package:
             self.__generate_html(workdir)
 
-        if self.__is_option_set(OPT_PACKAGE_RESULT):
+        if self.args.package:
             self.__package_results(workdir)
 
             
