@@ -1,0 +1,63 @@
+{
+    "--attributes": {"aliases":["-a"],
+        "default": [],
+        "action":"append",
+        "help":"attribute-based runs"
+    },
+    "--baseline": {"aliases":["-b"],
+    "default": "git://github.com/cdat/uvcdat-testdata",
+     "help": "Git checkout a repo containing the baselines"
+    },
+    "--diags":{
+        "aliases":[
+            "-d"
+        ],
+        "dest":"other_parameters",
+        "help":"Path to other user-defined parameter file.",
+        "nargs":"+",
+        "required":false,
+        "type":"str"
+    },
+    "--failed":{"aliases":["-f"],
+    "help":"Run only test that failed last time",
+    "action":"store_true"},
+    "--html":{
+        "aliases": ["-H"],
+        "action": "store_true",
+        "help": "create and show html result page"
+    },
+    "--num_workers":{
+        "aliases":[
+            "-n"
+        ],
+        "help":"Number of workers, used when running with multiprocessing or in distributed mode.",
+        "required":false,
+        "type":"int"
+    },
+    "--package":{
+    "aliases": ["-P"],
+    "action": "store_true",
+    "help": "package test results"
+    },
+    "--parameters":{
+        "aliases":[
+            "-p"
+        ]
+    },
+    "--scheduler_addr":{
+        "aliases":[
+            "--N/A"
+        ],
+        "help":"Address of scheduler in the form of IP_ADDRESS:PORT. Used when running in distributed mode.",
+        "required":false,
+        "type":"str"
+    },
+    "tests":{
+        "nargs": "*",
+        "help": "tests to run"
+    },
+    "--verbosity": {"aliases":["-v"],
+    "choices":[0,1,2],
+"default":1,
+"help":"verbosity output level"}
+}
