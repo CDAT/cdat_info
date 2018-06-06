@@ -8,8 +8,6 @@ import time
 import multiprocessing
 import requests
 
-from Const import *
-
 def run_command(command, join_stderr=True, verbosity=2):
 
     if isinstance(command, str):
@@ -37,12 +35,9 @@ def run_command(command, join_stderr=True, verbosity=2):
     return ret_code, out
 
 def get_sampledata_path():
-    try:
-        return os.path.join(os.environ.get("UVCDAT_SETUP_PATH", sys.prefix),
-                            "share", "uvcdat", "sample_data")
-    except KeyError:
-        raise RuntimeError(
-            "UVCDAT environment not configured. Please source the setup_runtime script.")
+    env = os.environ.get("CDAT_SETUP_PATH",
+                         os.environ.get("UVCDAT_SETUP_PATH",sys.prefix))
+    return os.path.join(env, "share", "cdat", "sample_data")
 
 def download_sample_data_files(files_md5, path=None):
     """ Downloads sample data listed in <files_md5>
@@ -108,18 +103,3 @@ def download_sample_data_files(files_md5, path=None):
                 attempts = 5
             else:
                 attempts += 1
-
-def run_nose(run_options, attrs, verbosity, test_name):
-    opts = []
-    if run_options & OPT_COVERAGE:
-        opts += ["--with-coverage"]
-    if run_options & OPT_NO_VTK_UI:
-        opts += ["-A", 'not vtk_ui']
-    for att in attrs:
-        opts += ["-A", att]
-    command = ["nosetests", ] + opts + ["-s", test_name]
-    start = time.time()
-    ret_code, out = run_command(command, True, verbosity)
-    end = time.time()
-    return {test_name: {"result": ret_code, "log": out, "times": {
-                "start": start, "end": end}}}

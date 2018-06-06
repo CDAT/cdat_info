@@ -8,6 +8,10 @@
     "default": "git://github.com/cdat/uvcdat-testdata",
      "help": "Git checkout a repo containing the baselines"
     },
+    "--coverage": {"aliases":["-c"],
+    "action":"store_true",
+    "help":"run nose test with coverage info",
+    "default":false},
     "--diags":{
         "aliases":[
             "-d"
@@ -20,7 +24,7 @@
     },
     "--failed":{"aliases":["-f"],
     "help":"Run only test that failed last time",
-    "action":"store_true"},
+    "action":"store_true", "default": false},
     "--html":{
         "aliases": ["-H"],
         "action": "store_true",

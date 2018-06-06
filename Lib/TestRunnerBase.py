@@ -12,8 +12,7 @@ import time
 import webbrowser
 import shlex
 
-from Util import *
-from Const import *
+from .Util import run_command
 
 class TestRunnerBase:
 
@@ -26,7 +25,7 @@ class TestRunnerBase:
          args, get_sample_data)
       runner.run(workdir, args.tests)
     """
-    def __init__(self, test_suite_name, options, args, get_sample_data=False, 
+    def __init__(self, test_suite_name, options=[], option_files=[], get_sample_data=False, 
                  test_data_files_info=None):
         """
            test_suite_name: test suite name
@@ -39,77 +38,33 @@ class TestRunnerBase:
            test_data_files_info: file name of a text file containing list of 
                             data files needed for the test suite.
         """
+        options_files.insert(0,os.path.join(sys.prefix,"share","cdat","cdat_runtests.json"))
+        parser = cdp.cdp_parser.CDPPraser(None, set(option_files))
+        parser.addArgument("tests",nargs="*",help="Tests to run")
+
+        options += ["--coverage","--verbosity","--num_workers","--attributes",
+                    "--failed","--package","tests"]
+        for option in set(options):
+            parser.use(opt)
+        
+        self.args = parser.getParameter()
         self.test_suite_name = test_suite_name
         self.run_options = 0x00000000
 
-        if options & OPT_GENERATE_HTML and args.html:
-            self.run_options |= OPT_GENERATE_HTML
-        if options & OPT_PACKAGE_RESULT and args.package:
-            self.run_options |= OPT_PACKAGE_RESULT
-        if options & OPT_GET_BASELINE and args.git:
-            self.run_options |= OPT_GET_BASELINE
-        if options & OPT_FAILED_ONLY and args.failed_only:
-            self.run_options |= OPT_FAILED_ONLY
-        if options & OPT_NO_VTK_UI and args.no_vtk_ui:
-            self.run_options |= OPT_NO_VTK_UI
-        if options & OPT_VERBOSITY and args.verbosity:
-            self.verbosity = args.verbosity
-        else:
-            self.verbosity = 1
+        self.verbosity = args.verbosity
 
-        if options & OPT_VTK and args.vtk:
-            self.vtk_channels = args.vtk
-        else:
-            self.vtk_channels = None
+        self.ncpus = args.num_workers
 
-        if options & OPT_NCPUS and args.cpus:
-            self.ncpus = args.cpus
-        else:
-            self.ncpus = 1
-
-        if options & OPT_NOSETEST_ATTRS and args.attributes:
-            self.nosetest_attrs = args.attributes
-        else:
-            self.nosetests_attr = []
+        self.nosetest_attrs = args.attributes
 
         if get_sample_data == True:
             download_sample_data_files(test_data_files_info, get_sampledata_path())
             
-    def __set_run_options(self, options, args):
-        if options & OPT_GENERATE_HTML and args.html:
-            self.run_options |= OPT_GENERATE_HTML
-
-        if options & OPT_PACKAGE_RESULT and args.package:
-            self.run_options |= OPT_PACKAGE_RESULT
-
-        if options & OPT_GET_BASELINE and args.git:
-            self.run_options |= OPT_GET_BASELINE
-
-        if options & OPT_FAILED_ONLY and args.failed_only:
-            self.run_options |= OPT_FAILED_ONLY
-
-        if options & OPT_COVERAGE and args.coverage:
-            self.run_options |= OPT_COVERAGE
-
-        if options & OPT_NO_VTK_UI and args.no_vtk_ui:
-            self.run_options |= OPT_NO_VTK_UI
-
-        if options & OPT_VERBOSITY and args.verbosity:
-            self.verbosity = args.verbosity
-        else:
-            self.verbosity = 1
-
-        if options & OPT_VTK and args.vtk:
-            self.vtk_channels = args.vtk
-        else:
-            self.vtk_channels = None
-
-        self.ncpus = args.cpus
-        self.nosetests_attr = args.attributes
-        
-
     def __is_option_set(self, option):
-        return self.run_options & option
+        opt = getattr(self.args, option, False)
+        if not isinstance(opt, bool):
+            opt = True
+        return True
     
     def __get_tests(self, failed_only=False, tests=None):
         """
@@ -150,40 +105,48 @@ class TestRunnerBase:
         ret_code, cmd_output = self.__run_cmd('git rev-parse --abbrev-ref HEAD')
         o = "".join(cmd_output)
         branch = o.strip()
-        if not os.path.exists("uvcdat-testdata"):
-            cmd = "git clone git://github.com/cdat/uvcdat-testdata"
+        repo = os.path.basename(self.args.baseline)
+        if not os.path.exists(repo):
+            cmd = "git clone {}".format(self.args.baseline)
             ret_code, cmd_output = self.__run_cmd(cmd)
             if ret_code != SUCCESS:
                 return ret_code
-        os.chdir("uvcdat-testdata")
+        os.chdir(repo)
         ret_code, cmd_output = self.__run_cmd("git pull")
         if ret_code != SUCCESS:
             return ret_code
-        print("BRANCH WE ARE TRYING TO CHECKOUT is (%s)" % branch)
+        if self.verbosity>1:
+            print("BRANCH WE ARE TRYING TO CHECKOUT is (%s)" % branch)
         ret_code, cmd_output = self.__run_cmd("git checkout %s" % (branch))
         os.chdir(workdir)
         return(ret_code)
-
-    def __install_vtk_cdat(self):
-        #
-        # assumption: conda is in PATH
-        #
-        vtk_name = "vtk-cdat"
-        cmd = "conda install -f -y -c %s %s" % (self.vtk_channels, vtk_name)
-        ret_code, output = self.__run_cmd(cmd)
-        return ret_code
 
     def __run_cmd(self, cmd):
         ret_code, cmd_output = run_command(cmd, True, self.verbosity)
         return ret_code, cmd_output
 
+    def prep_options(self):
+        """Place holder extend this if you want more options"""
+        return []
+
+    def run_nose(self, test_name:
+        opts = self.prep_options()
+        if self.args.coverage:
+            opts += ["--with-coverage"]
+        for att in self.args.attributes:
+            opts += ["-A", att]
+        command = ["nosetests", ] + opts + ["-s", test_name]
+        start = time.time()
+        ret_code, out = run_command(command, True, verbosity)
+        end = time.time()
+        return {test_name: {"result": ret_code, "log": out, "times": {
+                    "start": start, "end": end}}}
+
     def __do_run_tests(self, test_names):
         ret_code = SUCCESS
         p = multiprocessing.Pool(self.ncpus)
         try:
-            func = partial(run_nose, self.run_options, self.nosetests_attr, 
-                           self.verbosity)
-            outs = p.map_async(func, test_names).get(3600)
+            outs = p.map_async(self.run_nose, (test_names, opts).get(3600)
         except KeyboardInterrupt:
             sys.exit(1)
         results = {}
