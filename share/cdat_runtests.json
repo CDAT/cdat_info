@@ -1,66 +1,101 @@
 {
-    "--attributes": {"aliases":["-a"],
-        "default": [],
-        "action":"append",
-        "help":"attribute-based runs"
-    },
-    "--baseline": {"aliases":["-b"],
-    "default": "git://github.com/cdat/uvcdat-testdata",
-     "help": "Git checkout a repo containing the baselines"
-    },
-    "--checkout_baseline": {"action":"store_true","default":false,"help":"checkout the baselines via git", "type":null},
-    "--coverage": {"aliases":["-c"],
-    "action":"store_true",
-    "help":"run nose test with coverage info","type":null,
-    "default":false},
-    "--diags":{
-        "aliases":[
+    "--attributes": {
+        "action": "append", 
+        "aliases": [
+            "-a"
+        ], 
+        "default": [], 
+        "help": "attribute-based runs"
+    }, 
+    "--baseline": {
+        "aliases": [
+            "-b"
+        ], 
+        "default": "git://github.com/cdat/uvcdat-testdata", 
+        "help": "Git checkout a repo containing the baselines"
+    }, 
+    "--checkout_baseline": {
+        "action": "store_true", 
+        "default": false, 
+        "help": "checkout the baselines via git", 
+        "type": null
+    }, 
+    "--coverage": {
+        "action": "store_true", 
+        "aliases": [
+            "-c"
+        ], 
+        "default": false, 
+        "help": "run nose test with coverage info", 
+        "type": null
+    }, 
+    "--diags": {
+        "aliases": [
             "-d"
-        ],
-        "dest":"other_parameters",
-        "help":"Path to other user-defined parameter file.",
-        "nargs":"+",
-        "required":false,
-        "type":"str"
-    },
-    "--failed":{"aliases":["-f"],
-    "help":"Run only test that failed last time",
-    "action":"store_true", "default": false, "type":null},
-    "--html":{
-        "aliases": ["-H"],
-        "action": "store_true",
-        "help": "create and show html result page",
-        "type":null
-    },
-    "--num_workers":{
-        "aliases":[
+        ], 
+        "dest": "other_parameters", 
+        "help": "Path to other user-defined parameter file.", 
+        "nargs": "+", 
+        "required": false, 
+        "type": "str"
+    }, 
+    "--failed": {
+        "action": "store_true", 
+        "aliases": [
+            "-f"
+        ], 
+        "default": false, 
+        "help": "Run only test that failed last time", 
+        "type": null
+    }, 
+    "--html": {
+        "action": "store_true", 
+        "aliases": [
+            "-H"
+        ], 
+        "help": "create and show html result page", 
+        "type": null
+    }, 
+    "--num_workers": {
+        "aliases": [
             "-n"
-        ],
-        "help":"Number of workers, used when running with multiprocessing or in distributed mode.",
-        "required":false,
-        "type":"int"
-    },
-    "--package":{
-    "aliases": ["-P"],
-    "action": "store_true",
-    "help": "package test results", "type":null
-    },
-    "--parameters":{
-        "aliases":[
+        ], 
+        "help": "Number of workers, used when running with multiprocessing or in distributed mode.", 
+        "required": false, 
+        "type": "int"
+    }, 
+    "--package": {
+        "action": "store_true", 
+        "aliases": [
+            "-P"
+        ], 
+        "help": "package test results", 
+        "type": null
+    }, 
+    "--parameters": {
+        "aliases": [
             "-p"
         ]
-    },
-    "--scheduler_addr":{
-        "aliases":[
+    }, 
+    "--scheduler_addr": {
+        "aliases": [
             "--N/A"
-        ],
-        "help":"Address of scheduler in the form of IP_ADDRESS:PORT. Used when running in distributed mode.",
-        "required":false,
-        "type":"str"
-    },
-    "--verbosity": {"aliases":["-v"],
-    "choices":[0,1,2],
-"default":1,
-"type":"int",
-"help":"verbosity output level"}
+        ], 
+        "help": "Address of scheduler in the form of IP_ADDRESS:PORT. Used when running in distributed mode.", 
+        "required": false, 
+        "type": "str"
+    }, 
+    "--verbosity": {
+        "aliases": [
+            "-v"
+        ], 
+        "choices": [
+            0, 
+            1, 
+            2
+        ], 
+        "default": 1, 
+        "help": "verbosity output level", 
+        "type": "int"
+    }
 }
