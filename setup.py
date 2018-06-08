@@ -24,4 +24,5 @@ f.close()
 setup (name = "cdat_info",
        packages = ['cdat_info'],
        package_dir = {'cdat_info': "Lib"},
+       data_files = [ ('share/cdat', ['share/cdat_runtests.json'])]
       )
