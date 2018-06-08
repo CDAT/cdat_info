@@ -8,7 +8,7 @@ import time
 import multiprocessing
 import requests
 
-SUCCESS = 1
+SUCCESS = 0
 
 def run_command(command, join_stderr=True, verbosity=2):
 
