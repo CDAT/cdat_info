@@ -22,7 +22,7 @@ try:
 except:
     hasImageDifference = False
 
-class TestRunnerBase:
+class TestRunnerBase(object):
 
     """
     This is a base class for a test runner.
@@ -96,7 +96,7 @@ class TestRunnerBase:
                     new_tests.append(failed_test)
             test_names = new_tests
 
-        return(test_names)
+        return test_names
 
 
     def __get_baseline(self, workdir):
@@ -128,7 +128,7 @@ class TestRunnerBase:
         ret_code, cmd_output = run_command(cmd, True, self.verbosity)
         return ret_code, cmd_output
 
-    def __prep_nose_options(self):
+    def _prep_nose_options(self):
         """Place holder extend this if you want more options"""
         return []
 
@@ -137,7 +137,7 @@ class TestRunnerBase:
         ret_code = SUCCESS
         p = multiprocessing.Pool(self.ncpus)
         # Let's prep the options once and for all
-        opts = self.__prep_nose_options()
+        opts = self._prep_nose_options()
         if self.args.coverage:
             opts += ["--with-coverage"]
         for att in self.args.attributes:
@@ -159,8 +159,11 @@ class TestRunnerBase:
         f.close()
 
         if self.verbosity > 0:
-            print("Ran %i tests, %i failed (%.2f%% success)" %\
-                      (len(outs), len(failed), 100. - float(len(failed)) / len(outs) * 100.))
+            if len(outs)>0:
+                print("Ran %i tests, %i failed (%.2f%% success)" %\
+                        (len(outs), len(failed), 100. - float(len(failed)) / len(outs) * 100.))
+            else:
+                print("No test run")
             if len(failed) > 0:
                 print("Failed tests:")
                 for f in failed:
@@ -319,5 +322,7 @@ class TestRunnerBase:
 
         if self.args.package:
             self.__package_results(workdir)
+
+        return ret_code
 
             
