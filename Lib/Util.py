@@ -2,7 +2,6 @@ import os
 import sys
 import subprocess
 import shlex
-import Const
 import hashlib
 import time
 import multiprocessing
