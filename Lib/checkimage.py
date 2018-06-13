@@ -150,7 +150,7 @@ def check_result_image(fname, baselinefname, threshold=defaultThreshold,
 def checkImage(filename, canvas, baseDirectory, pngsDirectory, source=None, threshold=defaultThreshold,
                 pngReady=False, pngPathSet=False, verbosity=1):
     if source is None:
-        source = os.path.join(baseDirectory, os.path.basename(fnm))
+        source = os.path.join(baseDirectory, os.path.basename(filename))
     if not pngPathSet:
         filename = os.path.join(pngsDirectory, filename)
     if verbosity>0:
