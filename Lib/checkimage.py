@@ -147,20 +147,20 @@ def check_result_image(fname, baselinefname, threshold=defaultThreshold,
     printDart("ValidImage", "image/png", os.path.abspath(bestFilename), "File")
     return -1
 
-def checkImage(fnm, canvas, src=None, threshold=defaultThreshold,
+def checkImage(filename, canvas, baseDirectory, pngsDirectory, source=None, threshold=defaultThreshold,
                 pngReady=False, pngPathSet=False, verbosity=1):
-    if src is None:
-        src = os.path.join(self.basedir, os.path.basename(fnm))
+    if source is None:
+        source = os.path.join(baseDirectory, os.path.basename(fnm))
     if not pngPathSet:
-        fnm = os.path.join(self.pngsdir, fnm)
+        filename = os.path.join(pngsDirectory, filename)
     if verbosity>0:
-        print("Test file  :", fnm)
-        print("Source file:", src)
+        print("Test file  :", filename)
+        print("Source file:", source)
     if not pngReady:
         canvas.png(
-            fnm,
+            filename,
             width=canvas.width,
             height=canvas.height,
             units="pixels")
-    ret = check_result_image(fnm, src, threshold)
+    ret = check_result_image(filename, source, threshold)
     return ret
