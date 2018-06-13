@@ -69,7 +69,7 @@ class TestRunnerBase(object):
             download_sample_data_files(test_data_files_info, get_sampledata_path())
             
     
-    def __get_tests(self, tests=None):
+    def __get_tests(self):
         """
         get_tests() gets the list of test names to run.
         If <failed_only> is False, returns the set of the specified
@@ -80,10 +80,14 @@ class TestRunnerBase(object):
         If <failed_only> is True, and <tests> is specified, returns 
         the set of failed test names that is listed in <tests>
         """
-        if tests is None or len(tests) == 0:
+        tests = self.args.tests
+        if len(tests) == 0:
             # run all tests
             test_names = glob.glob("tests/test_*py")
         else:
+            tests_names = []
+            for test in tests:
+                tests_names += glob.glob(test)
             test_names = set(tests)
 
         if self.args.failed and os.path.exists(os.path.join("tests",".last_failure")):
@@ -268,9 +272,9 @@ class TestRunnerBase(object):
                 if file1 != "":
                     print('<div id="comparison"></div><script type="text/javascript"> ImageCompare.compare(' +\
                               'document.getElementById("comparison"), "%s", "%s"); </script>' % (
-                            abspath(file2, nm, "test"), abspath(file1, nm, "source")), file=fe)
+                            self.__abspath(file2, nm, "test"), self.__abspath(file1, nm, "source")), file=fe)
                     print("<div><a href='index.html'>Back To Results List</a></div>", file=fe)
-                    print("<div id='diff'><img src='%s' alt='diff file'></div>" % abspath(
+                    print("<div id='diff'><img src='%s' alt='diff file'></div>" % self.__abspath(
                                 diff, nm, "diff"), file=fe)
                     print("<div><a href='index.html'>Back To Results List</a></div>", file=fe)
             print('<div id="output"><h1>Log</h1><pre>%s</pre></div>' % "\n".join(result[
@@ -300,7 +304,7 @@ class TestRunnerBase(object):
             print("Packaged Result Info in:", tnm)
             
 
-    def run(self, workdir, tests=None):
+    def run(self, workdir):
         """
         runs the specified test cases. If tests is None, runs the whole testsuite.
 
@@ -308,7 +312,7 @@ class TestRunnerBase(object):
         tests  : a space separated list of test cases
         """
         os.chdir(workdir)
-        test_names = self.__get_tests(tests)
+        test_names = self.__get_tests()
 
         if self.args.checkout_baseline:
             ret_code = self.__get_baseline(workdir)
