@@ -143,7 +143,7 @@ class TestRunnerBase(object):
         # Let's prep the options once and for all
         opts = self._prep_nose_options()
         if self.args.coverage:
-            opts += ["--with-coverage"]
+            opts += ["--with-coverage", "--cover-html", "--cover-xml"]
         for att in self.args.attributes:
             opts += ["-A", att]
         func = partial(run_nose,opts, self.verbosity)
