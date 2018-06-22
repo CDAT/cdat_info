@@ -14,7 +14,7 @@
         "default": "git://github.com/cdat/uvcdat-testdata", 
         "help": "Git checkout a repo containing the baselines"
     }, 
-    "--checkout_baseline": {
+    "--checkout-baseline": {
         "action": "store_true", 
         "default": false, 
         "help": "checkout the baselines via git", 
