@@ -51,7 +51,7 @@ class TestRunnerBase(object):
         parser.add_argument("tests",nargs="*",help="Tests to run")
 
         options += ["--coverage","--verbosity","--num_workers","--attributes",
-                    "--parameters","--diags","--baseline","--checkout_baseline",
+                    "--parameters","--diags","--baseline","--checkout-baseline",
                     "--html", "--failed","--package"]
         for option in set(options):
             parser.use(option)
