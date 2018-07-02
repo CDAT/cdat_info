@@ -10,7 +10,7 @@ class TestFlake8(unittest.TestCase):
         pth = os.path.dirname(__file__)
         pth = os.path.join(pth, "..")
         pth = os.path.abspath(pth)
-        pth = os.path.join(pth, "vcs")
+        pth = os.path.join(pth, "Lib")
         print()
         print()
         print()
@@ -22,7 +22,7 @@ class TestFlake8(unittest.TestCase):
         print()
         print()
         print()
-        P = subprocess.Popen(shlex.split("flake8 --show-source --statistics %s" % pth),
+        P = subprocess.Popen(shlex.split("flake8 --show-source --statistics --max-line-width=120 %s" % pth),
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
