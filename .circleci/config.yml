@@ -19,8 +19,8 @@ aliases:
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       conda create -q -n py2 -c cdat/label/nightly -c conda-forge -c cdat testsrunner
-       conda create -q -n py3 -c cdat/label/nightly -c conda-forge -c cdat testsrunner
+       conda create -q -n py2 -c cdat/label/linatest -c cdat/label/nightly -c conda-forge -c cdat testsrunner
+       conda create -q -n py3 -c cdat/label/linatest -c cdat/label/nightly -c conda-forge -c cdat testsrunner
 
   - &setup_testsrunner
   - &setup_cdat_info
@@ -53,7 +53,7 @@ aliases:
   - &conda_upload
     name: conda_upload
     command: |
-       if [[ $CIRCLE_BRANCH != 'master' ]]; then
+       if [[ $CIRCLE_BRANCH != 'view_failed_tests' ]]; then
           exit 0
        fi
        export PATH=${HOME}/project/$WORKDIR/miniconda/bin:$PATH
@@ -65,7 +65,7 @@ aliases:
        export PKG_NAME=cdat_info
        export USER=cdat
        export VERSION=8.0
-       export LABEL=nightly
+       export LABEL=linatest
        python ./prep_for_build.py -l $VERSION
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=2.7
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=3.6
