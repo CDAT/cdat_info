@@ -19,8 +19,8 @@ aliases:
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       conda create -q -n py2 -c cdat/label/nightly -c conda-forge -c cdat testsrunner
-       conda create -q -n py3 -c cdat/label/nightly -c conda-forge -c cdat testsrunner
+       conda create -q -n py2 -c cdat/label/nightly -c conda-forge -c cdat testsrunner python=2
+       conda create -q -n py3 -c cdat/label/nightly -c conda-forge -c cdat testsrunner python=3
 
   - &setup_testsrunner
   - &setup_cdat_info
@@ -46,7 +46,7 @@ aliases:
        source activate py3
        python run_tests.py -H -n 2
        PY3_RESULT=$?
-       echo "**** py3 test result: "${PY3_RESULT}
+       echo "*** py3 test result: "${PY3_RESULT}
        RESULT=$(( $RESULT + $PY3_RESULT))
        exit $RESULT
 
