@@ -26,6 +26,15 @@ triedToClean = False
 post_url = 'https://uvcdat-usage.llnl.gov/log/add/'
 posted = []
 
+
+def get_configure_directory():
+    """Return configure directory, default is ${HOME}/.cdat
+    can be controled via environment variable CDAT_CONFIG_DIR
+    """
+    return os.environ.get("CDAT_CONFIG_DIR",
+                          os.path.join(os.path.expanduser("~"), ".cdat"))
+
+
 def version():
     sp = Version.split("-")
     vnm = "-".join(sp[:-2])
@@ -97,11 +106,12 @@ def get_prefix():
 
 def get_sampledata_path():
     try:
-        return os.path.join(os.environ.get("UVCDAT_SETUP_PATH", sys.prefix),
-                            "share", "uvcdat", "sample_data")
+        return os.path.join(os.environ.get("CDAT_SETUP_PATH",
+                                           os.environ.get("UVCDAT_SETUP_PATH"),
+                            sys.prefix), "share", "cdat", "sample_data")
     except KeyError:
         raise RuntimeError(
-            "UVCDAT environment not configured. Please source the setup_runtime script.")
+            "CDAT environment not configured properly.")
 
 
 def runCheck():
@@ -123,10 +133,10 @@ def runCheck():
                     ", you have it set to '%s', will be ignored" %
                     envanom)
         checkLock.acquire()
-        if val is None:  # No env variable looking in .uvcdat
+        if val is None:  # No env variable looking in .cdat
             fanom = os.path.join(
                 os.path.expanduser("~"),
-                ".uvcdat",
+                ".cdat",
                 ".anonymouslog")
             # last time and version we asked for anonymous
             if os.path.exists(fanom):
@@ -170,14 +180,10 @@ def askAnonymous(val):
             val = False
         if val in [True, False]:  # store result for next time
             try:
-                fanom = os.path.join(
-                    os.path.expanduser("~"), ".uvcdat", ".anonymouslog")
-                if not os.path.exists(os.path.join(
-                        os.path.expanduser("~"), ".uvcdat")):
-                    os.makedirs(
-                        os.path.join(
-                            os.path.expanduser("~"),
-                            ".uvcdat"))
+                config_dir = get_configure_directory()
+                fanom = os.path.join(config_dir, ".anonymouslog")
+                if not os.path.exists(config_dir):
+                    os.makedirs(config_dir)
                 data = {"log_anonymously": val,
                         "last_time_checked": time.time(),
                         "last_version_check": version()
@@ -249,10 +255,7 @@ def post_data(data):
 
 def cache_data(data):
     cacheLock.acquire()
-    cache_file = os.path.join(
-                os.path.expanduser("~"),
-                ".uvcdat",
-                ".cdat_cache")
+    cache_file = os.path.join(get_configure_directory(), ".cdat_cache")
     try:
         with bz2.BZ2File(cache_file) as f:
             cache = eval(f.read())
@@ -266,10 +269,7 @@ def cache_data(data):
 def clean_cache():
     triedToClean = True
     cacheLock.acquire()
-    cache_file = os.path.join(
-                os.path.expanduser("~"),
-                ".uvcdat",
-                ".cdat_cache")
+    cache_file = os.path.join(get_configure_directory(), ".cdat_cache")
     try:
         with bz2.BZ2File(cache_file)as f:
             cache = eval(f.read())
@@ -329,7 +329,7 @@ def submitPing(source, action, source_version=None):
 
 def download_sample_data_files(files_md5, path=None):
     """Downloads sample data from a list of files
-    Default download directory is os.environ["UVCDAT_SETUP_PATH"]
+    Default download directory is os.environ["CDAT_SETUP_PATH"]
     then data will be downloaded to that path.
 
     :Example:
@@ -337,7 +337,7 @@ def download_sample_data_files(files_md5, path=None):
         .. doctest:: download_sample_data
 
             >>> import os # use this to check if sample data already exists
-            >>> if not os.path.isdir(os.environ['UVCDAT_SETUP_PATH']):
+            >>> if not os.path.isdir(os.environ['CDAT_SETUP_PATH']):
             ...     cdat_info.download_sample_data_files()
 
     :param path: String of a valid filepath.
@@ -355,7 +355,7 @@ def download_sample_data_files(files_md5, path=None):
     download_url_root = samples[0].strip()
     if len(download_url_root.split()) > 1:
         # Old style
-        download_url_root = "https://uvcdat.llnl.gov/cdat/sample_data/"
+        download_url_root = "https://cdat.llnl.gov/cdat/sample_data/"
         n0 = 0
     else:
         n0 = 1
