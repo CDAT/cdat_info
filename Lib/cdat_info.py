@@ -10,7 +10,7 @@ import os
 import sys
 import requests
 import logging
-from . import version
+import cdat_git_version
 import cdat_info
 try:
     input=raw_input
@@ -18,7 +18,7 @@ except:
     pass
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-Version = version.__describe__
+Version = cdat_git_version.__describe__
 ping_checked = False
 cacheLock = threading.Lock()
 checkLock = threading.Lock()
