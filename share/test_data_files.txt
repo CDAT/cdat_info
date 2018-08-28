@@ -1,3 +1,0 @@
-http://uvcdat.llnl.gov/cdat/sample_data
-f8387bba04cfff75857319b4c58dd360  180808_NODC_annual_temperature_anomaly_1955-2017_0-2000m.nc
-97e76ba622b2e7623fdc2362ddec6a8f  woa13_decav_t00_01.nc

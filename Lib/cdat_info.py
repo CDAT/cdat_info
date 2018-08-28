@@ -24,6 +24,7 @@ cacheLock = threading.Lock()
 checkLock = threading.Lock()
 triedToClean = False
 post_url = 'https://uvcdat-usage.llnl.gov/log/add/'
+posted = []
 
 def version():
     sp = Version.split("-")
@@ -107,9 +108,10 @@ def runCheck():
     # Wait for other threads to be done
     last_time_checked = 0
     last_version_check = None
+    val = True
     if cdat_info.ping_checked is False:
         val = None
-        envanom = os.environ.get("UVCDAT_ANONYMOUS_LOG", None)
+        envanom = os.environ.get("CDAT_ANONYMOUS_LOG", os.environ.get("UVCDAT_ANONYMOUS_LOG", None))
         if envanom is not None:
             if envanom.lower() in ['true', 'yes', 'y', 'ok','1']:
                 val = True
@@ -117,7 +119,7 @@ def runCheck():
                 return False
             else:
                 warnings.warn(
-                    "UVCDAT logging environment variable UVCDAT_ANONYMOUS_LOG should be set to 'True' or 'False'" +
+                    "CDAT logging environment variable CDAT_ANONYMOUS_LOG should be set to 'True' or 'False'" +
                     ", you have it set to '%s', will be ignored" %
                     envanom)
         checkLock.acquire()
@@ -154,14 +156,14 @@ def runCheck():
                 current, last_version_check) > 0:  # we have a newer version
             val = None
         checkLock.release()
-        return val
+    return val
 
 
 def askAnonymous(val):
     while cdat_info.ping_checked is False and val not in [True, False]:  # couldn't get a valid value from env or file
         val2 = input(
-            "Allow anonymous logging usage to help improve UV-CDAT" +
-            "(you can also set the environment variable UVCDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
+            "Allow anonymous logging usage to help improve CDAT" +
+            "(you can also set the environment variable CDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
         if val2.lower() in ['y', 'yes', 'ok', '1', 'true', '']:
             val = True
         elif val2.lower() in ['n', 'no', 'not', '0', 'false']:
@@ -203,13 +205,18 @@ def pingPCMDIdb(*args, **kargs):
     except BaseException:
         pass
     askAnonymous(val)
-    kargs['target'] = pingPCMDIdbThread
-    kargs['args'] = args
-    try:
-        t = threading.Thread(**kargs)
-        t.start()
-    except BaseException:
-        pass
+    # Ping db only if we never did this yet!
+    if not args in posted:
+        posted.append(args)
+        kargs['target'] = pingPCMDIdbThread
+        kargs['args'] = args
+        try:
+            t = threading.Thread(**kargs)
+            t.start()
+        except BaseException:
+            pass
+        finally:
+            t._Thread__stop()
 
 
 def pingPCMDIdbThread(*args, **kargs):
@@ -226,6 +233,8 @@ def pingPCMDIdbThread(*args, **kargs):
                 pass
     except BaseException:
         pass
+    finally:
+        t._Thread__stop()
 
 def post_data(data):
     try:
