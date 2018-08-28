@@ -255,11 +255,14 @@ def post_data(data):
 
 def cache_data(data):
     cacheLock.acquire()
-    cache_file = os.path.join(get_configure_directory(), ".cdat_cache")
+    conf_dir = get_configure_directory()
+    cache_file = os.path.join(conf_dir, ".cdat_cache")
+    if not os.path.exists(conf_dir):
+        os.makedirs(conf_dir)
     try:
         with bz2.BZ2File(cache_file) as f:
             cache = eval(f.read())
-    except:
+    except Exception:
         cache = []
     cache.append(data)
     with bz2.BZ2File(cache_file,"w") as f:

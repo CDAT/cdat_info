@@ -1,5 +1,6 @@
-import cdat_info
 import os
+os.environ["CDAT_ANONYMOUS_LOG"] = "true"
+import cdat_info
 import unittest
 from subprocess import PIPE, Popen
 
