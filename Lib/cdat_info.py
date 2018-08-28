@@ -105,6 +105,10 @@ def get_prefix():
 
 
 def get_sampledata_path():
+    """Return path to CDAT sample data
+    Default is [PREFIX]/share/cdat/smaple_data but can be bypassed via
+    environment variable CDAT_SETUP_PATH
+    """
     try:
         return os.path.join(os.environ.get("CDAT_SETUP_PATH",
                                            os.environ.get("UVCDAT_SETUP_PATH"),
