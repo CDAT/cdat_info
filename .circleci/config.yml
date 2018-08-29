@@ -39,12 +39,14 @@ aliases:
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
        export UVCDAT_SETUP_PATH=${HOME}
-       cd tests
        source activate py2
+       cd tests
        python ../run_tests.py -H -v2 -n 2 test_cdat_*.py
        RESULT=$?
+       cd ..
        echo "*** py2 test result: "${RESULT} 
        source activate py3
+       cd tests
        python ../run_tests.py -H -n 2 test_cdat*py
        PY3_RESULT=$?
        echo "*** py3 test result: "${PY3_RESULT}
@@ -77,7 +79,7 @@ jobs:
     macos:
       xcode: "9.2.0"
     environment:
-      WORKDIR: "${HOME}/project/workspace/test_macos_cdat_info"
+      WORKDIR: "workspace/test_macos_cdat_info"
       OS: "osx-64"
     steps:
       - checkout
@@ -97,7 +99,7 @@ jobs:
     machine:
       image: circleci/classic:latest
     environment:
-      WORKDIR: "${HOME}/project/workspace/test_linux_cdat_info"
+      WORKDIR: "workspace/test_linux_cdat_info"
       OS: "linux-64"
     steps:
       - checkout
