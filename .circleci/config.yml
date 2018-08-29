@@ -77,7 +77,7 @@ jobs:
     macos:
       xcode: "9.2.0"
     environment:
-      WORKDIR: "workspace/test_macos_cdat_info"
+      WORKDIR: "${HOME}/project/workspace/test_macos_cdat_info"
       OS: "osx-64"
     steps:
       - checkout
@@ -97,7 +97,7 @@ jobs:
     machine:
       image: circleci/classic:latest
     environment:
-      WORKDIR: "workspace/test_linux_cdat_info"
+      WORKDIR: "${HOME}/project/workspace/test_linux_cdat_info"
       OS: "linux-64"
     steps:
       - checkout
