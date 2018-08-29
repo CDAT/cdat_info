@@ -10,7 +10,7 @@ import os
 import sys
 import requests
 import logging
-import cdat_git_version
+from .cdat_git_version import __describe__
 import cdat_info
 try:
     input=raw_input
@@ -18,7 +18,7 @@ except:
     pass
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-Version = cdat_git_version.__describe__
+Version = __describe__
 ping_checked = False
 cacheLock = threading.Lock()
 checkLock = threading.Lock()
@@ -218,33 +218,12 @@ def pingPCMDIdb(*args, **kargs):
     # Ping db only if we never did this yet!
     if not args in posted:
         posted.append(args)
-        kargs['target'] = pingPCMDIdbThread
+        kargs['target'] = submitPing
         kargs['args'] = args
-        try:
-            t = threading.Thread(**kargs)
-            t.start()
-        except BaseException:
-            pass
-        finally:
-            t._Thread__stop()
-
-
-def pingPCMDIdbThread(*args, **kargs):
-    kargs['target'] = submitPing
-    kargs['args'] = args
-    t = threading.Thread(**kargs)
-    try:
+        t = threading.Thread(**kargs)
+        t.daemon = True
         t.start()
-        time.sleep(2)  # Lets wait 2 seconds top for this ping to work
-        if t.isAlive():
-            try:
-                t._Thread__stop()
-            except BaseException:
-                pass
-    except BaseException:
-        pass
-    finally:
-        t._Thread__stop()
+
 
 def post_data(data):
     try:
