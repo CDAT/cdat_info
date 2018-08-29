@@ -21,5 +21,4 @@ class ThreadsTest(unittest.TestCase):
             p = Popen("ps {} -p {}".format(thread_option, pid).split(),stdin=PIPE, stdout=PIPE, stderr=PIPE)
             o,e = p.communicate()
             maximum_num_threads = max(len(o.decode().split("\n")), maximum_num_threads)
-            print(maximum_num_threads)
             self.assertLess(maximum_num_threads, 15)
