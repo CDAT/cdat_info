@@ -17,7 +17,7 @@ try:
         Version = descr
 except:
     descr = Version
-f = open("Lib/version.py", "w")
+f = open("Lib/cdat_git_version.py", "w")
 print("__version__ = '%s'" % Version, file=f)
 print("__describe__ = '%s'" % descr, file=f)
 f.close()

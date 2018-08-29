@@ -10,7 +10,7 @@ import os
 import sys
 import requests
 import logging
-from . import version
+from .cdat_git_version import __describe__
 import cdat_info
 try:
     input=raw_input
@@ -18,12 +18,22 @@ except:
     pass
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-Version = version.__describe__
+Version = __describe__
 ping_checked = False
 cacheLock = threading.Lock()
 checkLock = threading.Lock()
 triedToClean = False
 post_url = 'https://uvcdat-usage.llnl.gov/log/add/'
+posted = []
+
+
+def get_configure_directory():
+    """Return configure directory, default is ${HOME}/.cdat
+    can be controled via environment variable CDAT_CONFIG_DIR
+    """
+    return os.environ.get("CDAT_CONFIG_DIR",
+                          os.path.join(os.path.expanduser("~"), ".cdat"))
+
 
 def version():
     sp = Version.split("-")
@@ -95,21 +105,27 @@ def get_prefix():
 
 
 def get_sampledata_path():
+    """Return path to CDAT sample data
+    Default is [PREFIX]/share/cdat/smaple_data but can be bypassed via
+    environment variable CDAT_SETUP_PATH
+    """
     try:
-        return os.path.join(os.environ.get("UVCDAT_SETUP_PATH", sys.prefix),
-                            "share", "uvcdat", "sample_data")
+        return os.path.join(os.environ.get("CDAT_SETUP_PATH",
+                                           os.environ.get("UVCDAT_SETUP_PATH"),
+                            sys.prefix), "share", "cdat", "sample_data")
     except KeyError:
         raise RuntimeError(
-            "UVCDAT environment not configured. Please source the setup_runtime script.")
+            "CDAT environment not configured properly.")
 
 
 def runCheck():
     # Wait for other threads to be done
     last_time_checked = 0
     last_version_check = None
+    val = True
     if cdat_info.ping_checked is False:
         val = None
-        envanom = os.environ.get("UVCDAT_ANONYMOUS_LOG", None)
+        envanom = os.environ.get("CDAT_ANONYMOUS_LOG", os.environ.get("UVCDAT_ANONYMOUS_LOG", None))
         if envanom is not None:
             if envanom.lower() in ['true', 'yes', 'y', 'ok','1']:
                 val = True
@@ -117,14 +133,14 @@ def runCheck():
                 return False
             else:
                 warnings.warn(
-                    "UVCDAT logging environment variable UVCDAT_ANONYMOUS_LOG should be set to 'True' or 'False'" +
+                    "CDAT logging environment variable CDAT_ANONYMOUS_LOG should be set to 'True' or 'False'" +
                     ", you have it set to '%s', will be ignored" %
                     envanom)
         checkLock.acquire()
-        if val is None:  # No env variable looking in .uvcdat
+        if val is None:  # No env variable looking in .cdat
             fanom = os.path.join(
                 os.path.expanduser("~"),
-                ".uvcdat",
+                ".cdat",
                 ".anonymouslog")
             # last time and version we asked for anonymous
             if os.path.exists(fanom):
@@ -154,28 +170,24 @@ def runCheck():
                 current, last_version_check) > 0:  # we have a newer version
             val = None
         checkLock.release()
-        return val
+    return val
 
 
 def askAnonymous(val):
     while cdat_info.ping_checked is False and val not in [True, False]:  # couldn't get a valid value from env or file
         val2 = input(
-            "Allow anonymous logging usage to help improve UV-CDAT" +
-            "(you can also set the environment variable UVCDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
+            "Allow anonymous logging usage to help improve CDAT" +
+            "(you can also set the environment variable CDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
         if val2.lower() in ['y', 'yes', 'ok', '1', 'true', '']:
             val = True
         elif val2.lower() in ['n', 'no', 'not', '0', 'false']:
             val = False
         if val in [True, False]:  # store result for next time
             try:
-                fanom = os.path.join(
-                    os.path.expanduser("~"), ".uvcdat", ".anonymouslog")
-                if not os.path.exists(os.path.join(
-                        os.path.expanduser("~"), ".uvcdat")):
-                    os.makedirs(
-                        os.path.join(
-                            os.path.expanduser("~"),
-                            ".uvcdat"))
+                config_dir = get_configure_directory()
+                fanom = os.path.join(config_dir, ".anonymouslog")
+                if not os.path.exists(config_dir):
+                    os.makedirs(config_dir)
                 data = {"log_anonymously": val,
                         "last_time_checked": time.time(),
                         "last_version_check": version()
@@ -203,29 +215,15 @@ def pingPCMDIdb(*args, **kargs):
     except BaseException:
         pass
     askAnonymous(val)
-    kargs['target'] = pingPCMDIdbThread
-    kargs['args'] = args
-    try:
+    # Ping db only if we never did this yet!
+    if not args in posted:
+        posted.append(args)
+        kargs['target'] = submitPing
+        kargs['args'] = args
         t = threading.Thread(**kargs)
+        t.daemon = True
         t.start()
-    except BaseException:
-        pass
 
-
-def pingPCMDIdbThread(*args, **kargs):
-    kargs['target'] = submitPing
-    kargs['args'] = args
-    t = threading.Thread(**kargs)
-    try:
-        t.start()
-        time.sleep(2)  # Lets wait 2 seconds top for this ping to work
-        if t.isAlive():
-            try:
-                t._Thread__stop()
-            except BaseException:
-                pass
-    except BaseException:
-        pass
 
 def post_data(data):
     try:
@@ -240,14 +238,14 @@ def post_data(data):
 
 def cache_data(data):
     cacheLock.acquire()
-    cache_file = os.path.join(
-                os.path.expanduser("~"),
-                ".uvcdat",
-                ".cdat_cache")
+    conf_dir = get_configure_directory()
+    cache_file = os.path.join(conf_dir, ".cdat_cache")
+    if not os.path.exists(conf_dir):
+        os.makedirs(conf_dir)
     try:
         with bz2.BZ2File(cache_file) as f:
             cache = eval(f.read())
-    except:
+    except Exception:
         cache = []
     cache.append(data)
     with bz2.BZ2File(cache_file,"w") as f:
@@ -257,10 +255,7 @@ def cache_data(data):
 def clean_cache():
     triedToClean = True
     cacheLock.acquire()
-    cache_file = os.path.join(
-                os.path.expanduser("~"),
-                ".uvcdat",
-                ".cdat_cache")
+    cache_file = os.path.join(get_configure_directory(), ".cdat_cache")
     try:
         with bz2.BZ2File(cache_file)as f:
             cache = eval(f.read())
@@ -320,7 +315,7 @@ def submitPing(source, action, source_version=None):
 
 def download_sample_data_files(files_md5, path=None):
     """Downloads sample data from a list of files
-    Default download directory is os.environ["UVCDAT_SETUP_PATH"]
+    Default download directory is os.environ["CDAT_SETUP_PATH"]
     then data will be downloaded to that path.
 
     :Example:
@@ -328,7 +323,7 @@ def download_sample_data_files(files_md5, path=None):
         .. doctest:: download_sample_data
 
             >>> import os # use this to check if sample data already exists
-            >>> if not os.path.isdir(os.environ['UVCDAT_SETUP_PATH']):
+            >>> if not os.path.isdir(os.environ['CDAT_SETUP_PATH']):
             ...     cdat_info.download_sample_data_files()
 
     :param path: String of a valid filepath.
@@ -346,7 +341,7 @@ def download_sample_data_files(files_md5, path=None):
     download_url_root = samples[0].strip()
     if len(download_url_root.split()) > 1:
         # Old style
-        download_url_root = "https://uvcdat.llnl.gov/cdat/sample_data/"
+        download_url_root = "https://cdat.llnl.gov/cdat/sample_data/"
         n0 = 0
     else:
         n0 = 1

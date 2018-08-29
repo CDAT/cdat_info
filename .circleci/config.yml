@@ -40,11 +40,14 @@ aliases:
        export UVCDAT_ANONYMOUS_LOG=False
        export UVCDAT_SETUP_PATH=${HOME}
        source activate py2
-       python run_tests.py -H -v2 -n 2
+       cd tests
+       python ../run_tests.py -H -v2 -n 2 test_cdat_*.py
        RESULT=$?
+       cd ..
        echo "*** py2 test result: "${RESULT} 
        source activate py3
-       python run_tests.py -H -n 2
+       cd tests
+       python ../run_tests.py -H -n 2 test_cdat*py
        PY3_RESULT=$?
        echo "*** py3 test result: "${PY3_RESULT}
        RESULT=$(( $RESULT + $PY3_RESULT))
