@@ -13,7 +13,7 @@ import logging
 from .cdat_git_version import __describe__
 import cdat_info
 try:
-    input=raw_input
+    input = raw_input
 except:
     pass
 
@@ -112,7 +112,7 @@ def get_sampledata_path():
     try:
         return os.path.join(os.environ.get("CDAT_SETUP_PATH",
                                            os.environ.get("UVCDAT_SETUP_PATH"),
-                            sys.prefix), "share", "cdat", "sample_data")
+                                           sys.prefix), "share", "cdat", "sample_data")
     except KeyError:
         raise RuntimeError(
             "CDAT environment not configured properly.")
@@ -125,9 +125,10 @@ def runCheck():
     val = True
     if cdat_info.ping_checked is False:
         val = None
-        envanom = os.environ.get("CDAT_ANONYMOUS_LOG", os.environ.get("UVCDAT_ANONYMOUS_LOG", None))
+        envanom = os.environ.get("CDAT_ANONYMOUS_LOG",
+                                 os.environ.get("UVCDAT_ANONYMOUS_LOG", None))
         if envanom is not None:
-            if envanom.lower() in ['true', 'yes', 'y', 'ok','1']:
+            if envanom.lower() in ['true', 'yes', 'y', 'ok', '1']:
                 val = True
             elif envanom.lower() in ['false', 'no', 'n', 'not', '0']:
                 return False
@@ -161,7 +162,7 @@ def runCheck():
                                     val = eval(sp[1])
                                 except BaseException:
                                     pass
-        if (last_time_checked==0 or last_version_check is None) and val is False:
+        if (last_time_checked == 0 or last_version_check is None) and val is False:
             val = None
         elif time.time() - last_time_checked > 2592000 and val is False:  # Approximately 1 month
             val = None
@@ -174,7 +175,8 @@ def runCheck():
 
 
 def askAnonymous(val):
-    while cdat_info.ping_checked is False and val not in [True, False]:  # couldn't get a valid value from env or file
+    # couldn't get a valid value from env or file
+    while cdat_info.ping_checked is False and val not in [True, False]:
         val2 = input(
             "Allow anonymous logging usage to help improve CDAT" +
             "(you can also set the environment variable CDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
@@ -228,13 +230,14 @@ def pingPCMDIdb(*args, **kargs):
 def post_data(data):
     try:
         post = requests.post(
-            url = cdat_info.post_url,
-            data = data)
-        if not (200<=post.status_code<300):
+            url=cdat_info.post_url,
+            data=data)
+        if not (200 <= post.status_code < 300):
             return data
     except BaseException as err:
         return data
     return None
+
 
 def cache_data(data):
     cacheLock.acquire()
@@ -248,9 +251,10 @@ def cache_data(data):
     except Exception:
         cache = []
     cache.append(data)
-    with bz2.BZ2File(cache_file,"w") as f:
+    with bz2.BZ2File(cache_file, "w") as f:
         f.write(repr(cache).encode('utf-8'))
     cacheLock.release()
+
 
 def clean_cache():
     triedToClean = True
@@ -261,18 +265,19 @@ def clean_cache():
             cache = eval(f.read())
     except Exception as err:
         cache = []
-    if len(cache)==0:  # No cache
+    if len(cache) == 0:  # No cache
         cacheLock.release()
         return
 
-    bad=[]
+    bad = []
     for data in cache:
         result = post_data(data)
         if result is not None:
             bad.append(data)
-    with bz2.BZ2File(cache_file,"w") as f:
+    with bz2.BZ2File(cache_file, "w") as f:
         f.write(repr(bad).encode('utf-8'))
     cacheLock.release()
+
 
 def submitPing(source, action, source_version=None):
     if not triedToClean:
@@ -304,7 +309,8 @@ def submitPing(source, action, source_version=None):
             data['sleep'] = cdat_info.sleep
             data['pid'] = os.getpid()
             login = pwd.getpwuid(os.geteuid())[0]
-            data['hashed_username'] = hashlib.sha1(login.encode("utf-8")).hexdigest()
+            data['hashed_username'] = hashlib.sha1(
+                login.encode("utf-8")).hexdigest()
             data['gmtime'] = time.asctime(time.gmtime())
             data = post_data(data)
     except BaseException as err:
@@ -356,12 +362,13 @@ def download_sample_data_files(files_md5, path=None):
         while attempts < 3:
             md5 = hashlib.md5()
             if os.path.exists(local_filename):
-                f = open(local_filename,"rb")
+                f = open(local_filename, "rb")
                 md5.update(f.read())
                 if md5.hexdigest() == good_md5:
                     attempts = 5
                     continue
-            print("Downloading: '%s' from '%s' in: %s" % (name, download_url_root, local_filename))
+            print("Downloading: '%s' from '%s' in: %s" %
+                  (name, download_url_root, local_filename))
             r = requests.get(
                 "%s/%s" % (download_url_root, name),
                 stream=True)
