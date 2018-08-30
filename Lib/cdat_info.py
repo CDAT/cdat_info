@@ -111,8 +111,9 @@ def get_sampledata_path():
     """
     try:
         return os.path.join(os.environ.get("CDAT_SETUP_PATH",
-                                           os.environ.get("UVCDAT_SETUP_PATH"),
-                                           sys.prefix), "share", "cdat", "sample_data")
+                                           os.environ.get("UVCDAT_SETUP_PATH",
+                                                          sys.prefix)),
+                            "share", "cdat", "sample_data")
     except KeyError:
         raise RuntimeError(
             "CDAT environment not configured properly.")
