@@ -15,7 +15,7 @@ aliases:
   - &create_conda_env
     name: create_conda_env
     environment:
-       CHANNELS: "-c cdat/label/nightly -c conda-forget -c cdat"
+       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
        PKGS: "nbformat testsrunner"
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
