@@ -44,10 +44,8 @@ aliases:
        export CDAT_ANONYMOUS_LOG=False
        export CDAT_SETUP_PATH=${HOME}
        source activate $PY_VER
-       cd tests
-       python ../run_tests.py -H -v2 -n 2 test_cdat_*.py
+       python run_tests.py -H -v2 -n 2 test_cdat_*.py
        RESULT=$?
-       cd ..
        echo "*** $PY_VER test result: "${RESULT} 
        exit $RESULT
 
