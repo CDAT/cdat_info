@@ -1,0 +1,42 @@
+{% set name = "cdat_info" %}
+
+package:
+  name: {{ name|lower }}
+  version: @VERSION@
+
+source:
+    git_rev: @UVCDAT_BRANCH@
+    git_url: git://github.com/CDAT/cdat_info.git
+
+build:
+  number: 0
+  skip: True  # [win]
+  script: python setup.py install
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - requests
+    - nbformat
+
+test:
+  imports:
+    - cdat_info
+
+about:
+  home:  http://cdat.llnl.gov
+  license: CCLRC
+  license_file: LEGAL.txt
+  summary: 'Community Data Analysis Tools'
+  description: |                                                                                                                                             
+    is a powerful and complete front-end to a rich set of visual-data 
+    exploration and analysis capabilities well suited for climate-data 
+    analysis problems.
+
+
+extra:
+  recipe-maintainers:
+    - doutriaux1

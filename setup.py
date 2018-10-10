@@ -22,7 +22,9 @@ print("__version__ = '%s'" % Version, file=f)
 print("__describe__ = '%s'" % descr, file=f)
 f.close()
 setup (name = "cdat_info",
+       version=Version,
        packages = ['cdat_info'],
        package_dir = {'cdat_info': "Lib"},
-       data_files = [ ('share/cdat', ['share/cdat_runtests.json'])]
+       data_files = [ ('share/cdat', ['share/cdat_runtests.json'])],
+       scripts = ['scripts/generate_cdat_notebook.py']
       )

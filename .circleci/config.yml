@@ -19,8 +19,8 @@ aliases:
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       conda create -q -n py2 -c cdat/label/nightly -c conda-forge -c cdat testsrunner python=2
-       conda create -q -n py3 -c cdat/label/nightly -c conda-forge -c cdat testsrunner python=3
+       conda create -q -n py2 -c cdat/label/nightly -c conda-forge -c cdat nbformat testsrunner python=2
+       conda create -q -n py3 -c cdat/label/nightly -c conda-forge -c cdat nbformat testsrunner python=3
 
   - &setup_testsrunner
   - &setup_cdat_info
@@ -65,6 +65,10 @@ aliases:
        export CONDA_BLD_PATH=`pwd`/conda_build
        git clone git://github.com/cdat/conda-recipes
        cd conda-recipes
+       if [[ -d cdat_info ]]; then
+          rm -rf cdat_info
+       fi
+       ln -s ../recipe cdat_info
        export PKG_NAME=cdat_info
        export USER=cdat
        export VERSION=8.0
@@ -72,6 +76,7 @@ aliases:
        python ./prep_for_build.py -l $VERSION
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=2.7
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=3.6
+       conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=3.7
        anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
 
 jobs:

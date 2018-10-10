@@ -3,7 +3,7 @@ import sys
 from cdat_info import TestRunnerBase
 
 
-test_suite_name = 'testsrunner'
+test_suite_name = 'cdatinfo'
 
 workdir = os.getcwd()
 
