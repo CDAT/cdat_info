@@ -120,11 +120,11 @@ def generateProvenance(extra_pairs={}, history=True):
         session_history = ""
         try:
             import IPython
-            profile_hist=IPython.core.history.HistoryAccessor(profile='default')
+            profile_hist=IPython.core.history.HistoryAccessor()
             session = profile_hist.get_last_session_id()
             cursor = profile_hist.get_range(session)
             for session_id, line, cmd in cursor.fetchall():
-                    session_history += cmd
+                    session_history += "{}\n".format(cmd)
         except Exception as err:
             # Fallback but does not seem to always work
             import readline
