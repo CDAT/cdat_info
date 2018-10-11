@@ -1,0 +1,4 @@
+{
+    "include": ["cdat_info"],
+    "subprocess": ["bin/generate_cdat_notebook.py"]
+}
