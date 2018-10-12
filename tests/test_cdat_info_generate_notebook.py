@@ -30,17 +30,6 @@ class NBTest(unittest.TestCase):
         self.checkNB("tests/metadata_png.ipynb", "test_metadata_png.ipynb")
         os.remove("test_metadata_png.ipynb")
 
-    def test_generate_conda_env(self):
-        yml_string = cdat_info.generateProvenance()["conda"]["yaml"]
-        yml_name = cdat_info.generateCondaEnvironment(yml_string,
-                                                      name="test_Conda",
-                                                      yamlFile="test_yml_gen.yml",
-                                                      createEnvironment=True)
-        self.assertTrue(os.path.exists(yml_name))
-        code, out = run_command("conda env list")
-        self.assertTrue("test_Conda" in "".join(out))
-
-
     def test_generate_notebook(self):
         history = 'import vcs\nx=vcs.init()\nx.plot([1,2,3])\nx.png("testme", provenance=True)'
         cdat_info.generateNotebook("test_gen_nb", history=history, header="Test this CIRCLECI!!")

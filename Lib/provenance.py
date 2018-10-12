@@ -10,12 +10,14 @@ import tempfile
 def populate_prov(prov, cmd, pairs, sep=None, index=1, fill_missing=False):
     try:
         p = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
-    except:
+    except Exception as err:
+        print("ERROR running {} was {}".format(cmd,err))
         return
     out, stde = p.communicate()
-    if stde != '':
+    if stde.decode("utf-8") != '':
+        print("STDE NOT EMPYTY:{}".format(stde))
         return
-    for strBit in out.splitlines():
+    for strBit in out.decode("utf-8").splitlines():
         for key, value in pairs.items():
             if value in strBit:
                 prov[key] = strBit.split(sep)[index].strip()
