@@ -1,6 +1,7 @@
 from __future__ import print_function
 import cdat_info
 import unittest
+import os
 from testsrunner import run_command
 
 class ProvTest(unittest.TestCase):
