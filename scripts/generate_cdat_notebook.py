@@ -55,10 +55,27 @@ if not isinstance(provenance, dict):
 conda = provenance.get("conda", {})
 yaml_text = conda.get("yaml", "")
 history = provenance.get("history", "")
+header = """# Source file information\n
+Name: {}\n
+Generated on {}\n
+By: {}\n
+Platform: {} {} ({})\n
+""".format(
+    input_filename,
+    provenance["date"],
+    provenance["userId"],
+    provenance["platform"]["Name"],
+    provenance["platform"]["OS"],
+    provenance["platform"]["Version"])
 
+# Ok maybe it was a script?
+script = provenance.get("script","")
+if script != "":
+    history = script
+    header += "\nGenerated via script, command line: `{}`\n\nScript sources pasted bellow\n\n".format(provenance["commandLine"])
 if history == "":
     raise RuntimeError("Could not read history (or empty history) from `{}`".format(args.input))
-
+header += "\nMore information probably available in file's provenance dictionary"
 if args.generate_conda:
     if yaml_text == "":
         raise RuntimeError("Could not read conda environment from `{}`".format(args.input))
@@ -69,7 +86,7 @@ notebook = args.notebook
 if notebook[-6:].lower() != ".ipynb":
     notebook += ".ipynb"
 
-generateNotebook(notebook, history)
+generateNotebook(notebook, history, header=header)
     
 if args.run:
     p = Popen(shlex.split("jupyter notebook {}".format(notebook)), stdout=PIPE, stderr=PIPE)

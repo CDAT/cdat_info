@@ -125,11 +125,21 @@ def generateProvenance(extra_pairs={}, history=True):
             cursor = profile_hist.get_range(session)
             for session_id, line, cmd in cursor.fetchall():
                     session_history += "{}\n".format(cmd)
+            if session_history == "":  # empty history
+                # trying to force fallback on readline
+                raise
         except Exception as err:
             # Fallback but does not seem to always work
             import readline
             for i in range(readline.get_current_history_length()):
                 session_history += "{}\n".format(readline.get_history_item(i + 1))
+            pass
+        try:
+            import __main__
+            with open(__main__.__file__) as f:
+                script = f.read()
+            prov["script"] = script
+        except Exception as err:
             pass
         prov["history"] = session_history
     return prov
