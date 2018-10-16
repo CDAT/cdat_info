@@ -45,8 +45,8 @@ else:
 provenance = {}
 try:
     f = cdms2.open(input_filename)
-    provenance = f.getattr(f,"provenance", {})
-except Exception:
+    provenance = getattr(f,"provenance", {})
+except Exception as err:
     # ok failed cdms, trying vcs
     metadata = vcs.png_read_metadata(input_filename)
     provenance = metadata.get("provenance", {})
@@ -62,11 +62,11 @@ By: {}\n
 Platform: {} {} ({})\n
 """.format(
     input_filename,
-    provenance["date"],
-    provenance["userId"],
-    provenance["platform"]["Name"],
-    provenance["platform"]["OS"],
-    provenance["platform"]["Version"])
+    provenance.get("date", "???"),
+    provenance.get("userId", "???"),
+    provenance.get("platform", {}).get("Name", "???"),
+    provenance.get("platform", {}).get("OS", "???"),
+    provenance.get("platform", {}).get("Version", "???"))
 
 # Ok maybe it was a script?
 script = provenance.get("script","")
