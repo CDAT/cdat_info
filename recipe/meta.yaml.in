@@ -28,8 +28,8 @@ test:
 
 about:
   home:  http://cdat.llnl.gov
-  license: CCLRC
-  license_file: LEGAL.txt
+  license: BSD
+  license_file: bsd-3-clause.txt
   summary: 'Community Data Analysis Tools'
   description: |                                                                                                                                             
     is a powerful and complete front-end to a rich set of visual-data 
