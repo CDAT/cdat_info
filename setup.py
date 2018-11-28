@@ -1,5 +1,5 @@
 from __future__ import print_function
-from distutils.core import setup
+from setuptools import setup, find_packages
 import subprocess
 
 Version = "8.0"
@@ -15,16 +15,15 @@ try:
     Version = "-".join(descr.split("-")[:-2])
     if Version == "":
         Version = descr
-except:
+except Exception:
     descr = Version
-f = open("Lib/cdat_git_version.py", "w")
-print("__version__ = '%s'" % Version, file=f)
-print("__describe__ = '%s'" % descr, file=f)
-f.close()
-setup (name = "cdat_info",
-       version=Version,
-       packages = ['cdat_info'],
-       package_dir = {'cdat_info': "Lib"},
-       data_files = [ ('share/cdat', ['share/cdat_runtests.json'])],
-       scripts = ['scripts/generate_cdat_notebook.py']
+
+with open("cdat_info/cdat_git_version.py", "w") as f:
+    print("__version__ = '%s'" % Version, file=f)
+    print("__describe__ = '%s'" % descr, file=f)
+
+setup(name="cdat_info",
+      version=Version,
+      packages=find_packages(),
+      scripts=['scripts/generate_cdat_notebook.py']
       )

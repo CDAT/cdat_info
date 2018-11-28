@@ -44,10 +44,12 @@ else:
 # Ok now loop through possible CDAT generated object
 provenance = {}
 try:
+    print("Trying input file as cdms2 readable file")
     f = cdms2.open(input_filename)
     provenance = getattr(f,"provenance", {})
 except Exception as err:
     # ok failed cdms, trying vcs
+    print("Trying input file as vcs png file")
     metadata = vcs.png_read_metadata(input_filename)
     provenance = metadata.get("provenance", {})
 if not isinstance(provenance, dict):
@@ -69,7 +71,7 @@ Platform: {} {} ({})\n
     provenance.get("platform", {}).get("Version", "???"))
 
 # Ok maybe it was a script?
-script = provenance.get("script","")
+script = provenance.get("script", "")
 if script != "":
     history = script
     header += "\nGenerated via script, command line: `{}`\n\nScript sources pasted bellow\n\n".format(provenance["commandLine"])
@@ -83,11 +85,14 @@ if args.generate_conda:
 
 # Check file extension
 notebook = args.notebook
-if notebook[-6:].lower() != ".ipynb":
+print("NOTEBOOK OUT:", notebook)
+if notebook is None:
+    notebook = os.path.splitext(args.input)[0] + ".ipynb"
+elif notebook[-6:].lower() != ".ipynb":
     notebook += ".ipynb"
 
 generateNotebook(notebook, history, header=header)
     
 if args.run:
-    p = Popen(shlex.split("jupyter notebook {}".format(notebook)), stdout=PIPE, stderr=PIPE)
+    p = Popen(shlex.split("jupyter lab {}".format(notebook)), stdout=PIPE, stderr=PIPE)
     p.communicate()
