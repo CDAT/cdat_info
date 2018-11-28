@@ -25,5 +25,6 @@ with open("cdat_info/cdat_git_version.py", "w") as f:
 setup(name="cdat_info",
       version=Version,
       packages=find_packages(),
+      data_files = [ ('share/cdat', ['share/cdat_runtests.json'])],
       scripts=['scripts/generate_cdat_notebook.py']
       )
