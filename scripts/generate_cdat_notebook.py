@@ -85,7 +85,6 @@ if args.generate_conda:
 
 # Check file extension
 notebook = args.notebook
-print("NOTEBOOK OUT:", notebook)
 if notebook is None:
     notebook = os.path.splitext(args.input)[0] + ".ipynb"
 elif notebook[-6:].lower() != ".ipynb":
