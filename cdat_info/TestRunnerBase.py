@@ -1,6 +1,10 @@
 import sys
 import os
 import testsrunner
+import pkg_resources
+
+
+egg_path = pkg_resources.resource_filename(pkg_resources.Requirement.parse("cdat_info"), "share/cdat")
 
 
 class TestRunnerBase(testsrunner.TestRunnerBase):
@@ -28,8 +32,7 @@ class TestRunnerBase(testsrunner.TestRunnerBase):
            test_data_files_info: file name of a text file containing list of 
                             data files needed for the test suite.
         """
-        options_files.insert(0, os.path.join(
-            sys.prefix, "share", "cdat", "cdat_runtests.json"))
+        options_files.insert(0, os.path.join(egg_path, "cdat_runtests.json"))
         super(TestRunnerBase, self).__init__(test_suite_name,
                                              options, options_files,
                                              get_sample_data, test_data_files_info)

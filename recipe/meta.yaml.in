@@ -9,8 +9,9 @@ source:
     git_url: git://github.com/CDAT/cdat_info.git
 
 build:
-  number: 0
+  number: @BUILD_NUMBER@
   skip: True  # [win]
+  noarch: python
   script: python setup.py install
 
 requirements:
