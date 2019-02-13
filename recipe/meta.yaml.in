@@ -22,6 +22,7 @@ requirements:
     - python
     - requests
     - nbformat
+    - openssl >1.1
 
 test:
   imports:
