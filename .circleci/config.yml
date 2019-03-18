@@ -177,10 +177,10 @@ workflows:
   version: 2
   cdat_info:
     jobs:
-      - macos_cdat_info_py2
-      - macos_cdat_info_py3:
-           requires:
-              - macos_cdat_info_py2
+        #      - macos_cdat_info_py2
+      - macos_cdat_info_py3
+          #  requires:
+          #    - macos_cdat_info_py2
       - linux_cdat_info_py2
       - linux_cdat_info_py3:
            requires:
