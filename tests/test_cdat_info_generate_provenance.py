@@ -3,6 +3,12 @@ import cdat_info
 import unittest
 import os
 from testsrunner import run_command
+ 
+CONDA = os.environ.get("CONDA_PYTHON_EXE","")
+if CONDA != "":
+    CONDA = os.path.join(os.path.dirname(CONDA), "conda")
+else:
+    CONDA = "conda"
 
 class ProvTest(unittest.TestCase):
     def test_generate_conda_provenance(self):
@@ -17,5 +23,5 @@ class ProvTest(unittest.TestCase):
                                                       yamlFile="test_yml_gen.yml",
                                                       createEnvironment=True)
         self.assertTrue(os.path.exists(yml_name))
-        code, out = run_command("conda env list")
+        code, out = run_command(CONDA + " env list")
         self.assertTrue("test_Conda" in "".join(out))
