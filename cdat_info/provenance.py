@@ -6,6 +6,12 @@ from subprocess import Popen, PIPE
 import shlex
 import tempfile
 
+CONDA = os.environ.get("CONDA_PYTHON_EXE","")
+if CONDA != "":
+    CONDA = os.path.join(os.path.dirname(CONDA), "conda")
+else:
+    CONDA = "conda"
+
 # Platform
 def populate_prov(prov, cmd, pairs, sep=None, index=1, fill_missing=False):
     try:
@@ -63,7 +69,7 @@ def generateProvenance(extra_pairs={}, history=True):
         'RootEnvironment': 'root environment ',
         'DefaultEnvironment': 'default environment '
     }
-    populate_prov(prov["conda"], "conda info", pairs, sep=":", index=-1)
+    populate_prov(prov["conda"], CONDA + " info", pairs, sep=":", index=-1)
     pairs = {
         'blas': 'blas',
         'cdp': 'cdp ',
@@ -84,12 +90,12 @@ def generateProvenance(extra_pairs={}, history=True):
         'vtk': 'vtk-cdat ',
     }
     # Actual environement used
-    p = Popen(shlex.split("conda env export"), stdout=PIPE, stderr=PIPE)
+    p = Popen(shlex.split(CONDA + " env export"), stdout=PIPE, stderr=PIPE)
     o,e = p.communicate()
     prov["conda"]["yaml"] = o.decode("utf-8")
     prov["packages"] = collections.OrderedDict()
-    populate_prov(prov["packages"], "conda list", pairs, fill_missing=None)
-    populate_prov(prov["packages"], "conda list", extra_pairs, fill_missing=None)
+    populate_prov(prov["packages"], CONDA + " list", pairs, fill_missing=None)
+    populate_prov(prov["packages"], CONDA + " list", extra_pairs, fill_missing=None)
     # Trying to capture glxinfo
     pairs = {
         "vendor": "OpenGL vendor string",
@@ -180,7 +186,7 @@ def generateCondaEnvironment(yaml, name=None, yamlFile=None, createEnvironment=T
             environmentName = "-n {}".format(name)
         else:
             environmentName = ""
-        cmd = "conda env create -f {} {}".format(yamlFile.name, environmentName)
+        cmd = "{} env create -f {} {}".format(CONDA, yamlFile.name, environmentName)
         print("Creating conda envirnoment:\n",cmd)
         p = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
         o, e = p.communicate()

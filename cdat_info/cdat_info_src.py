@@ -38,6 +38,8 @@ def version():
     sp = Version.split("-")
     vnm = "-".join(sp[:-2])
     vlist = vnm.split(".") + sp[-2:]
+    if vlist[0] == "":
+        vlist = vlist[1:]
     # sometime first digit has "v" or some letter in front of it
     while len(vlist[0]) > 0 and not vlist[0][0].isdigit():
         vlist[0] = vlist[0][1:]
