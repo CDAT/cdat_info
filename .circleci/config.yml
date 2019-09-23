@@ -69,9 +69,9 @@ aliases:
        ln -s ../recipe cdat_info
        export PKG_NAME=cdat_info
        export USER=cdat
-       export VERSION=8.0
+       export VERSION=8.2
        export LABEL=nightly
-       python ./prep_for_build.py -l $VERSION
+       python ./prep_for_build.py -l $VERSION -b $CIRCLE_BRANCH
        if [[ $PY_VER = 'py2' ]]; then
           conda build $PKG_NAME $CHANNELS --python=2.7
        else
