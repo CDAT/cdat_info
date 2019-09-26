@@ -102,6 +102,7 @@ jobs:
       - run: *create_conda_env
       - run: *setup_cdat_info
       - run: *run_tests
+      - run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -122,6 +123,7 @@ jobs:
       - run: *create_conda_env
       - run: *setup_cdat_info
       - run: *run_tests
+      - run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -142,6 +144,7 @@ jobs:
       - run: *create_conda_env
       - run: *setup_cdat_info
       - run: *run_tests
+      - run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
