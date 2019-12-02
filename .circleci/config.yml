@@ -25,7 +25,7 @@ aliases:
        if [[ $PY_VER = "py2" ]]; then
           conda create -q -n $PY_VER $CHANNELS $PKGS python=2
        else
-          conda create -q -n $PY_VER $CHANNELS $PKGS python=3 $COVERAGE_PKGS
+          conda create -q -n $PY_VER $CHANNELS $PKGS "python>=3.7,<3.8" $COVERAGE_PKGS
        fi
 
   - &setup_cdat_info
@@ -86,7 +86,7 @@ aliases:
 jobs:
   macos_cdat_info_py2:
     macos:
-      xcode: "9.2.0"
+      xcode: "11.1.0"
     environment:
       WORKDIR: "workspace/test_macos_cdat_info_py2"
       OS: "osx-64"
@@ -106,7 +106,7 @@ jobs:
 
   macos_cdat_info_py3:
     macos:
-      xcode: "9.2.0"
+      xcode: "11.1.0"
     environment:
       WORKDIR: "workspace/test_macos_cdat_info_py3"
       OS: "osx-64"
