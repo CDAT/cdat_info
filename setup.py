@@ -2,7 +2,7 @@ from __future__ import print_function
 from setuptools import setup, find_packages
 import subprocess
 
-Version = "8.1"
+Version = "8.2"
 p = subprocess.Popen(
     ("git",
      "describe",
