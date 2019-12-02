@@ -25,7 +25,7 @@ aliases:
        if [[ $PY_VER = "py2" ]]; then
           conda create -q -n $PY_VER $CHANNELS $PKGS python=2
        else
-          conda create -q -n $PY_VER $CHANNELS $PKGS python=3 $COVERAGE_PKGS
+          conda create -q -n $PY_VER $CHANNELS $PKGS "python>=3.7,<3.8" $COVERAGE_PKGS
        fi
 
   - &setup_cdat_info
