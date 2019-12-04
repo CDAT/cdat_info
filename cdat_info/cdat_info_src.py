@@ -121,112 +121,114 @@ def get_sampledata_path():
 
 
 def runCheck():
+    return False
     # Wait for other threads to be done
-    last_time_checked = 0
-    last_version_check = None
-    val = True
-    if cdat_info.ping_checked is False:
-        val = None
-        envanom = os.environ.get("CDAT_ANONYMOUS_LOG",
-                                 os.environ.get("UVCDAT_ANONYMOUS_LOG", None))
-        if envanom is not None:
-            if envanom.lower() in ['true', 'yes', 'y', 'ok', '1']:
-                val = True
-            elif envanom.lower() in ['false', 'no', 'n', 'not', '0']:
-                return False
-            else:
-                warnings.warn(
-                    "CDAT logging environment variable CDAT_ANONYMOUS_LOG should be set to 'True' or 'False'" +
-                    ", you have it set to '%s', will be ignored" %
-                    envanom)
-        checkLock.acquire()
-        if val is None:  # No env variable looking in .cdat
-            fanom = os.path.join(
-                os.path.expanduser("~"),
-                ".cdat",
-                ".anonymouslog")
-            # last time and version we asked for anonymous
-            if os.path.exists(fanom):
-                try:
-                    with open(fanom) as f:
-                        data = json.load(f)
-                        val = data.get("log_anonymously", None)
-                        last_time_checked = data.get("last_time_checked", 0)
-                        last_version_check = data.get(
-                            "last_version_check", None)
-                except BaseException:
-                    with open(fanom) as f:
-                        for l in f.readlines():
-                            sp = l.strip().split()
-                            if sp[0].lower().find("cdat_anonymous") > - \
-                                    1 and len(sp) > 1:
-                                try:
-                                    val = eval(sp[1])
-                                except BaseException:
-                                    pass
-        if (last_time_checked == 0 or last_version_check is None) and val is False:
-            val = None
-        elif time.time() - last_time_checked > 2592000 and val is False:  # Approximately 1 month
-            val = None
-        current = version()
-        if val is False and last_version_check is not None and versions_compare(
-                current, last_version_check) > 0:  # we have a newer version
-            val = None
-        checkLock.release()
-    return val
+    # last_time_checked = 0
+    # last_version_check = None
+    # val = True
+    # if cdat_info.ping_checked is False:
+    #     val = None
+    #     envanom = os.environ.get("CDAT_ANONYMOUS_LOG",
+    #                              os.environ.get("UVCDAT_ANONYMOUS_LOG", None))
+    #     if envanom is not None:
+    #         if envanom.lower() in ['true', 'yes', 'y', 'ok', '1']:
+    #             val = True
+    #         elif envanom.lower() in ['false', 'no', 'n', 'not', '0']:
+    #             return False
+    #         else:
+    #             warnings.warn(
+    #                 "CDAT logging environment variable CDAT_ANONYMOUS_LOG should be set to 'True' or 'False'" +
+    #                 ", you have it set to '%s', will be ignored" %
+    #                 envanom)
+    #     checkLock.acquire()
+    #     if val is None:  # No env variable looking in .cdat
+    #         fanom = os.path.join(
+    #             os.path.expanduser("~"),
+    #             ".cdat",
+    #             ".anonymouslog")
+    #         # last time and version we asked for anonymous
+    #         if os.path.exists(fanom):
+    #             try:
+    #                 with open(fanom) as f:
+    #                     data = json.load(f)
+    #                     val = data.get("log_anonymously", None)
+    #                     last_time_checked = data.get("last_time_checked", 0)
+    #                     last_version_check = data.get(
+    #                         "last_version_check", None)
+    #             except BaseException:
+    #                 with open(fanom) as f:
+    #                     for l in f.readlines():
+    #                         sp = l.strip().split()
+    #                         if sp[0].lower().find("cdat_anonymous") > - \
+    #                                 1 and len(sp) > 1:
+    #                             try:
+    #                                 val = eval(sp[1])
+    #                             except BaseException:
+    #                                 pass
+    #     if (last_time_checked == 0 or last_version_check is None) and val is False:
+    #         val = None
+    #     elif time.time() - last_time_checked > 2592000 and val is False:  # Approximately 1 month
+    #         val = None
+    #     current = version()
+    #     if val is False and last_version_check is not None and versions_compare(
+    #             current, last_version_check) > 0:  # we have a newer version
+    #         val = None
+    #     checkLock.release()
+    # return val
 
 
 def askAnonymous(val):
     # couldn't get a valid value from env or file
-    while cdat_info.ping_checked is False and val not in [True, False]:
-        val2 = input(
-            "Allow anonymous logging usage to help improve CDAT" +
-            "(you can also set the environment variable CDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
-        if val2.lower() in ['y', 'yes', 'ok', '1', 'true', '']:
-            val = True
-        elif val2.lower() in ['n', 'no', 'not', '0', 'false']:
-            val = False
-        if val in [True, False]:  # store result for next time
-            try:
-                config_dir = get_configure_directory()
-                fanom = os.path.join(config_dir, ".anonymouslog")
-                if not os.path.exists(config_dir):
-                    os.makedirs(config_dir)
-                data = {"log_anonymously": val,
-                        "last_time_checked": time.time(),
-                        "last_version_check": version()
-                        }
-                with open(fanom, "w") as f:
-                    json.dump(data, f, indent=2)
-            except BaseException:
-                pass
-    else:
-        if cdat_info.ping_checked:
-            val = cdat_info.ping
-    cdat_info.ping = val
+    # while cdat_info.ping_checked is False and val not in [True, False]:
+    #     val2 = input(
+    #         "Allow anonymous logging usage to help improve CDAT" +
+    #         "(you can also set the environment variable CDAT_ANONYMOUS_LOG to yes or no)? [yes]/no: ")
+    #     if val2.lower() in ['y', 'yes', 'ok', '1', 'true', '']:
+    #         val = True
+    #     elif val2.lower() in ['n', 'no', 'not', '0', 'false']:
+    #         val = False
+    #     if val in [True, False]:  # store result for next time
+    #         try:
+    #             config_dir = get_configure_directory()
+    #             fanom = os.path.join(config_dir, ".anonymouslog")
+    #             if not os.path.exists(config_dir):
+    #                 os.makedirs(config_dir)
+    #             data = {"log_anonymously": val,
+    #                     "last_time_checked": time.time(),
+    #                     "last_version_check": version()
+    #                     }
+    #             with open(fanom, "w") as f:
+    #                 json.dump(data, f, indent=2)
+    #         except BaseException:
+    #             pass
+    # else:
+    #     if cdat_info.ping_checked:
+    #         val = cdat_info.ping
+    cdat_info.ping = False #val
     cdat_info.ping_checked = True
 
 
 def pingPCMDIdb(*args, **kargs):
-    val = runCheck()
-    if val is False:
-        cdat_info.ping_checked = True
-        cdat_info.ping = False
-        return
-    try:
-        if not cdat_info.ping:
-            return
-    except BaseException:
-        pass
-    askAnonymous(val)
-    # Ping db only if we never did this yet!
-    if not args in posted:
-        posted.append(args)
-        kargs['target'] = submitPing
-        kargs['args'] = args
-        t = threading.Thread(**kargs)
-        t.daemon = True
-        t.start()
+    return
+    # val = runCheck()
+    # if val is False:
+    #     cdat_info.ping_checked = True
+    #     cdat_info.ping = False
+    #     return
+    # try:
+    #     if not cdat_info.ping:
+    #         return
+    # except BaseException:
+    #     pass
+    # askAnonymous(val)
+    # # Ping db only if we never did this yet!
+    # if not args in posted:
+    #     posted.append(args)
+    #     kargs['target'] = submitPing
+    #     kargs['args'] = args
+    #     t = threading.Thread(**kargs)
+    #     t.daemon = True
+    #     t.start()
 
 
 def post_data(data):
