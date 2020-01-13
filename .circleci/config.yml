@@ -127,7 +127,6 @@ jobs:
          - attach_workspace:
               at: .
          - run: *setup_run_tests
-         - run: *get_testdata
          - run: *run_tests
          - store_artifacts:
               path: tests_html
@@ -147,7 +146,6 @@ jobs:
          - attach_workspace:
               at: .
          - run: *setup_run_tests
-         - run: *get_testdata
          - run: *run_tests
          - store_artifacts:
               path: tests_html
@@ -167,7 +165,6 @@ jobs:
          - attach_workspace:
               at: .
          - run: *setup_run_tests
-         - run: *get_testdata
          - run: *run_tests
          - store_artifacts:
               path: tests_html
@@ -189,7 +186,6 @@ jobs:
          - attach_workspace:
               at: .
          - run: *setup_run_tests
-         - run: *get_testdata
          - run: *run_tests
          - run: *run_coveralls
          - store_artifacts:
