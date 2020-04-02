@@ -5,7 +5,7 @@ aliases:
     name: setup_miniconda
     command: |
        mkdir -p workspace
-       git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
+       git clone -b validateNightlyNew git@github.com:CDAT/cdat workspace/cdat
        # install_miniconda.py installs miniconda3 under $WORKDIR/miniconda
        python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
 
@@ -113,7 +113,7 @@ jobs:
               paths:
                  - linux_build
 
-   macos_cdat_info_py2:
+   macos_cdat_info_py36:
       macos:
          xcode: "11.3.0"
       environment:
@@ -121,7 +121,7 @@ jobs:
          PKG_NAME: "cdat_info"
          REPO_NAME: "cdat_info"
          ENV_NAME: "test_cdat_info"
-         CONDA_PY_VER: "python<3"
+         CONDA_PY_VER: "python>=3.6,<3.7"
       steps:
          - checkout
          - attach_workspace:
@@ -151,7 +151,26 @@ jobs:
               path: tests_html
               destination: tests_html
 
-   linux_cdat_info_py2:
+   macos_cdat_info_py38:
+      macos:
+         xcode: "11.3.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "cdat_info"
+         REPO_NAME: "cdat_info"
+         ENV_NAME: "test_cdat_info"
+         CONDA_PY_VER: "python>=3.8,<3.9"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *setup_run_tests
+         - run: *run_tests
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
+   linux_cdat_info_py36:
       machine:
          image: circleci/classic:latest
       environment:
@@ -159,13 +178,16 @@ jobs:
          PKG_NAME: "cdat_info"
          REPO_NAME: "cdat_info"
          ENV_NAME: "test_cdat_info"
-         CONDA_PY_VER: "python<3"
+         CONDA_PY_VER: "python>=3.6,<3.7"
+         COVERAGE: "-c tests/coverage.json --coverage-from-egg"
+         COVERAGE_PKGS: "coverage coveralls"
       steps:
          - checkout
          - attach_workspace:
               at: .
          - run: *setup_run_tests
          - run: *run_tests
+         - run: *run_coveralls
          - store_artifacts:
               path: tests_html
               destination: tests_html
@@ -179,6 +201,28 @@ jobs:
          REPO_NAME: "cdat_info"
          ENV_NAME: "test_cdat_info"
          CONDA_PY_VER: "python>=3.7,<3.8"
+         COVERAGE: "-c tests/coverage.json --coverage-from-egg"
+         COVERAGE_PKGS: "coverage coveralls"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *setup_run_tests
+         - run: *run_tests
+         - run: *run_coveralls
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
+   linux_cdat_info_py38:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "cdat_info"
+         REPO_NAME: "cdat_info"
+         ENV_NAME: "test_cdat_info"
+         CONDA_PY_VER: "python>=3.8,<3.9"
          COVERAGE: "-c tests/coverage.json --coverage-from-egg"
          COVERAGE_PKGS: "coverage coveralls"
       steps:
@@ -213,21 +257,29 @@ workflows:
       jobs:
          - macos_setup
          - linux_setup
-         - macos_cdat_info_py2:
+         - macos_cdat_info_py36:
               requires:
                  - macos_setup
          - macos_cdat_info_py37:
               requires:
                  - macos_setup
-         - linux_cdat_info_py2:
+         - macos_cdat_info_py38:
+              requires:
+                 - macos_setup
+         - linux_cdat_info_py36:
               requires:
                  - linux_setup
          - linux_cdat_info_py37:
               requires:
                  - linux_setup
+         - linux_cdat_info_py38:
+              requires:
+                 - linux_setup
          - upload:
               requires:
-                 - macos_cdat_info_py2
+                 - macos_cdat_info_py36
                  - macos_cdat_info_py37
-                 - linux_cdat_info_py2
+                 - macos_cdat_info_py38
+                 - linux_cdat_info_py36
                  - linux_cdat_info_py37
+                 - linux_cdat_info_py38
