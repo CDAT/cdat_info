@@ -170,8 +170,6 @@ jobs:
       machine:
          image: circleci/classic:latest
       environment:
-         PKG_NAME: << pipeline.parameters.pkg_name >>
-         VERSION: << pipeline.parameters.last_stable >>
          USER: << pipeline.parameters.user >>
          LABEL: << pipeline.parameters.label >>
       steps:
