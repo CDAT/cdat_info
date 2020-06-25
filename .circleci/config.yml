@@ -135,8 +135,6 @@ jobs:
          - run: *setup_miniconda
          - run: *conda_rerender
          - run: *conda_build
-         - run: ls -l artifacts
-         - run: ls -l artifacts/ar*
          - persist_to_workspace:
               root: .
               paths: 
@@ -152,8 +150,6 @@ jobs:
       executor: << parameters.os >>
       environment:
          PKG_NAME: << pipeline.parameters.pkg_name >>
-         REPO_NAME: << pipeline.parameters.repo_name >>
-         LAST_STABLE: << pipeline.parameters.last_stable >>
          ENV_NAME: << pipeline.parameters.env_name >>
          PY_VER: << parameters.py_ver >>
       steps:
