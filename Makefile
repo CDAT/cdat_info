@@ -23,7 +23,6 @@ ifeq ($(coverage),1)
 coverage_opt = -c tests/coverage.json --coverage-from-egg
 endif
 
-# TODO change back to master
 conda_recipes_branch ?= master
 
 conda_base = $(patsubst %/bin/conda,%,$(conda))
