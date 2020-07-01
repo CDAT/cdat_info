@@ -85,12 +85,7 @@ aliases:
        # DO NOT just copy 
        python setup.py install
        python -c "import $PKG_NAME"
-       # REVISIT running coverage is not WORKING
-       if [[ `uname` == "Linux" && $PY_VER == "3.7" ]]; then
-          make run-tests conda=$WORKDIR/miniconda/bin/conda conda_env=$ENV_NAME coverage="1"
-       else
-          make run-tests conda=$WORKDIR/miniconda/bin/conda conda_env=$ENV_NAME
-       fi
+       make run-tests conda=$WORKDIR/miniconda/bin/conda conda_env=$ENV_NAME
 
   - &conda_upload
     name: conda_upload
