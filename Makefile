@@ -9,7 +9,7 @@ pkg_name = cdat_info
 build_script = conda-recipes/build_tools/conda_build.py
 
 test_pkgs = nbformat testsrunner coverage coveralls
-last_stable ?= 8.2
+last_stable ?= 8.2.1
 
 conda_env ?= base
 workdir ?= $(PWD)/workspace

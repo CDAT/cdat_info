@@ -9,7 +9,7 @@ parameters:
       default: "cdat_info"
    last_stable:
       type: string
-      default: "8.2"
+      default: "8.2.1"
    user:
       type: string
       default: "cdat"
